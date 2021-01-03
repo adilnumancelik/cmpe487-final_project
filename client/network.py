@@ -2,6 +2,7 @@ import socket
 import threading
 import _thread
 import utils
+import game_control
 
 def send_message(server, receiver_ip, port, message):
     try:
@@ -14,6 +15,6 @@ def listen_to_server(server):
         try:
             from_server = server.recv(4096)
             # threading.Thread(target=utils.process_message, args=(from_server, ), daemon=True).start()
-            utils.process_message(from_server)
+            game_control.process_message(from_server)
         except: 
             pass   
