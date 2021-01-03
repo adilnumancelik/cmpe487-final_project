@@ -1,9 +1,8 @@
-import client.sender
-import client.utils
+import sender
+import utils
 
-SERVER_IP =
-PORT = 
+SERVER_IP = "52.203.72.10"
+PORT = 12345
 
 message = "keko"
-
-client.sender.send_message(SERVER_IP, PORT, message)
+sender.send_message(SERVER_IP, PORT, message)

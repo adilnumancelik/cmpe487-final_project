@@ -7,3 +7,6 @@ def byte_to_string(message):
   respond = message.decode()
   type(respond) # ensure it is string representation
   return respond
+
+def test(xd):
+  print(xd)
