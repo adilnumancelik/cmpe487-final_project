@@ -1,7 +1,7 @@
 import socket
 import threading
 import _thread
-import server.utils
+import utils
 
 def send_message_thread(receiver_ip_send, message):
     
@@ -10,8 +10,12 @@ def send_message_thread(receiver_ip_send, message):
     try:
       server.settimeout(5.0)
       server.connect((receiver_ip_send, 12345))
-      server.sendall(string_to_byte(message))
-
+      print("Send: " + message)
+      server.sendall(utils.string_to_byte(message))
+      print("Sent Successfully")
     except:
-      remove(receiver_ip_send)
+     # remove(receiver_ip_send)
       server.close()
+      print(":(")
+
+send_message_thread("188.3.160.244", "keko2")

@@ -1,20 +1,44 @@
 import socket
 import threading
 import _thread
-import server.utils
+import utils
+import json
 
+import GameController from game_controller
 
-def server_thread_tcp(MY_IP, MY_PORT):
+PORT = 12345
+
+def accept_connections():
+  controller = GameController()
   with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
-
-    server.bind((MY_IP, MY_PORT)) 
+    server.bind(('0.0.0.0', MY_PORT)) 
     server.listen()
-    while(1):
-      conn, addr = server.accept() 
+    print(f"Start to listen PORT: {MY_PORT}")
+    while True:
+      conn, addr = server.accept()
       with conn:
-        data = conn.recv(1024)
-        if not data:
-          continue
+        print(f"New connection request from {addr}")
 
-        message = utils.byte_to_string(data)
-        threading.Thread(target=respond_function, args=(message, ), daemon=True).start()
+        controller.add_connection(conn)          
+        threading.Thread(target=threaded_client, args=(conn, controller, contoller.get_connections_cnt()), daemon=True).start()
+
+
+def threaded_client(conn, controller, id):
+  while True:
+    data = conn.recv(1024)
+    if not data:
+      print(f"Player with {id} has been disconnected.")
+      break
+          
+    message = json.loads(utils.byte_to_string(data))
+    print(f"Receive message from Player {id}: {message}")
+
+    if "TYPE" not in message or "PAYLOAD" not in message:
+      print("Unkown type of message :(")
+
+    if message["TYPE"] == "NAME":
+      controller.enter_name(id, message["PAYLOAD"])
+    elif message["TYPE"] == "MOVE":
+      controller.move(id, message["PAYLOAD"])
+    elif message["TYPE"] == "ANSWER":
+      controller.check_answer(id, message["PAYLOAD"])
