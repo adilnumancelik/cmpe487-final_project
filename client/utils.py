@@ -12,4 +12,4 @@ def test(xd):
     print(xd)
 
 def update(game):
-    print(str(game))
+    print(game.state)
