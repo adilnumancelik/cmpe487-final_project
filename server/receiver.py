@@ -1,13 +1,10 @@
 import socket
-import os
 import threading
 import _thread
 import server.utils
 
-MY_IP = a
-MY_PORT = b
 
-def server_thread_tcp():
+def server_thread_tcp(MY_IP, MY_PORT):
   with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
 
     server.bind((MY_IP, MY_PORT)) 
