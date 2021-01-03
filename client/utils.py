@@ -10,3 +10,6 @@ def byte_to_string(message):
 
 def test(xd):
   print(xd)
+
+def process_message(inc_message):
+    print(f"keko dedi: {inc_message}")
