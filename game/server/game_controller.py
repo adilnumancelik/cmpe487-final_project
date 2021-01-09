@@ -2,6 +2,7 @@ import threading
 import pickle
 import json
 import sys
+import rand
 sys.path.append('..')
 
 from game import Game, GameState
@@ -27,7 +28,8 @@ class GameController():
         with self.lock:
             self.active_connections[id] = None
             self.game.players_names[id] = None
-            self.game.state = GameState.WAITING
+
+        self.genarate_question()
         self.notify_players()
 
 
@@ -46,6 +48,26 @@ class GameController():
                 conn.sendall(pickle.dumps(self.game))
 
 
+    def genarate_question(self):
+        operator_list = ["+", "-", "*"]
+        operator = rand.choice(operator_list):
+
+        limit = 20 if operator == "*" else 100
+
+        number_1 = rand.randint(1, limit)
+        number_2 = rand.randint(1, limit)
+
+        question = str(number_1) + operator + str(number_2)
+        answer = eval(question)
+
+        with self.lock:
+            self.game.state = GameState.QUESTION
+            self.game.question = question
+            self.answer = answer
+        
+        notify_players()
+
+
     def send_id(self, id):
         conn = self.active_connections[id]
 
@@ -62,8 +84,32 @@ class GameController():
             if conn:
                 conn.close()
 
-    def move(self, id, index):
-        pass 
+
+    def calculate_score(self, id, coordinate_x, coordinate_y):
+        directions = [[-1, 0], [-1, -1], [0, -1], [1, -1]]
+
+        with self.lock:
+            for x in range(coordinate_x - 1, coordinate_x + 2):
+                for y in range(coordinate_y - 1, coordinate_y + 2):
+                    for direction in directions:
+                        sequence = ""
+                        for i in range(3):
+                            sequence_coordinates.append([x - (i - 1) * direction[0], y - (i - 1) * direction[1]])
+                            sequence += self.game.board[sequence_coordinates[-1][0]][sequence_coordinates[-1][1]]
+
+                        if sequence == "SOS" and sequence_coordinates not in self.game.complete_lines:
+                            self.game.scores[id] += 1
+                            self.complete_lines.append(sequence_coordinates)
+
+    def move(self, id, move):
+        coordinate_x, coordinate_y, character = move
+
+        with self.lock:
+            self.game.board[coordinate_x][coordinate_y] = character
+
+        self.calculate_score(id)
+        self.notify_players()
+
     
-    def check_answer(self, id, index):
-        pass
+    # def check_answer(self, id, index):
+    #     pass
