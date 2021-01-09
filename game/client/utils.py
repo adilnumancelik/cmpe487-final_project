@@ -17,7 +17,7 @@ def dict_to_byte(message_dict):
     return message_as_bytes
 
 def byte_to_dict(message):
-    respond = message.decode()
-    type(respond) # ensure it is string representation
-    x=json.loads(respond)
-    return x
+    string = message.decode()
+    type(string) # ensure it is string representation
+    respond=json.loads(string)
+    return respond
