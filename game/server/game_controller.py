@@ -5,7 +5,7 @@ import sys
 sys.path.append('..')
 
 from game import Game, GameState
-from utils import string_to_byte
+from utils import string_to_byte, byte_to_string
 
 class GameController():
 
@@ -23,12 +23,12 @@ class GameController():
         return id
 
 
-    def remove_player(id):
+    def remove_player(self, id):
         with self.lock:
             self.active_connections[id] = None
             self.game.players_names[id] = None
             self.game.state = GameState.WAITING
-        notify_players()
+        self.notify_players()
 
 
     def enter_name(self, id, name):
@@ -37,16 +37,14 @@ class GameController():
             self.send_id(id)
             if self.game.players_names[1 - id] != None:
                 self.game.state = GameState.READY
-                notify_players()
+                self.notify_players()
 
 
     def notify_players(self):
-        message = {
-            "TYPE": "GAME",
-            "PAYLOAD": pickle.dumps(self.game)
-        }
         for conn in self.active_connections:
-            conn.sendall(string_to_byte(json.dumps(message)))
+            if conn:
+                conn.sendall(pickle.dumps(self.game))
+
 
     def send_id(self, id):
         conn = self.active_connections[id]
@@ -58,6 +56,11 @@ class GameController():
 
         conn.sendall(string_to_byte(json.dumps(message)))
 
+
+    def close_connections(self):
+        for conn in self.active_connections:
+            if conn:
+                conn.close()
 
     def move(self, id, index):
         pass 
