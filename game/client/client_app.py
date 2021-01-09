@@ -126,8 +126,10 @@ board.title("S0S")
 SorO = False
 
 def S():
+    global SorO
     SorO = True
 def O():
+    global SorO
     SorO = False
 
 #Function to handle moves. 
@@ -171,10 +173,19 @@ feedback_message.set("Type answer, press Enter.")
 feedback = Label(board, textvariable=feedback_message).grid(row = 2, column = 0)
 
 # Set button for picking S or O.
-#question_var = StringVar()
-#question_var.set(control.game.question)
-S=Button(board, text="Pick S", command = S, width="25", height="4").grid(row=3, column=0)
-O=Button(board, text="Pick O", command = O, width="25", height="4").grid(row=4, column=0)
+a=Button(board, text="Pick S", command = S, width="25", height="4")
+a.grid(row=3, column=0)
+b=Button(board, text="Pick O", command = O, width="25", height="4")
+b.grid(row=4, column=0)
+
+# Set score labels.
+your_score=StringVar()
+opponents_score=StringVar()
+your_score.set(f"Your score: {control.game.scores[control.player_id]}")
+opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}") 
+your = Label(board, textvariable=your_score).grid(row = 5, column = 0)
+opponent = Label(board, textvariable=opponents_score).grid(row = 6, column = 0)
+
 
 # Set board button variables.
 button_vars=[]
@@ -207,7 +218,8 @@ def update():
             question_var.set("")
             feedback_message.set("Wait your opponent to connect.")
 
-                     
+        your_score.set(f"Your score: {control.game.scores[control.player_id]}")
+        opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}")             
         
         # Input form answer.
         # answer_form['text']=""

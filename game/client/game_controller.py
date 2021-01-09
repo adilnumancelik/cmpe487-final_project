@@ -10,7 +10,7 @@ class GameController():
 
     def __init__(self):
         self.game = Game(10, 10)
-        self.player_id = -1
+        self.player_id = 0
         self.UPDATE_FLAG = False
 
     def process_message(self, inc_message):
