@@ -16,7 +16,12 @@ SERVER_IP = "52.203.72.10"
 SERVER = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 SERVER.settimeout(25.0)
 
+global is_message_received = False
+global control = GameController()
+
 def initialize():
+    global is_message_received
+    global control
     # Connect to the server.
     try:
         SERVER.connect((SERVER_IP, MY_PORT))
@@ -33,6 +38,13 @@ def initialize():
     # Start listening to the server.
     y=threading.Thread(target=listen_to_server, args=(SERVER, ), daemon=True)
     y.start()
+
+    while True:
+        while not is_message_received:
+            pass
+        control.process_message()
+
+
     y.join()
 
 def send_message(message):
@@ -42,7 +54,8 @@ def send_message(message):
         print("Message could not be sent.")
 
 def listen_to_server():
-    control = GameController()
+    global is_message_received
+    global control
     while True:
         try:
             from_server = SERVER.recv(4096)
@@ -52,7 +65,8 @@ def listen_to_server():
             send_message(message)
             # threading.Thread(target=control.process_message, args=(from_server, ), daemon=True).start()
             # Process the incoming message.
-            control.process_message(from_server)
+            is_message_received = True
+            control.received_message = utils.byte_to_string(from_server)
         except: 
             print("Server timed out.")
             return False   
