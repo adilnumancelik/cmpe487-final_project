@@ -40,5 +40,5 @@ def threaded_client(conn, controller, id):
       controller.enter_name(id, message["PAYLOAD"])
     elif message["TYPE"] == "MOVE":
       controller.move(id, message["PAYLOAD"])
-    # elif message["TYPE"] == "ANSWER":
-    #   controller.check_answer(id, message["PAYLOAD"])
+    elif message["TYPE"] == "ANSWER":
+      controller.check_answer(id, message["PAYLOAD"])

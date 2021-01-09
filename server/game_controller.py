@@ -1,4 +1,6 @@
 import threading
+import Game, GameState from game
+
 
 class GameController():
 
@@ -14,8 +16,8 @@ class GameController():
         with self.lock:
             self.game.players_names[id] = name
 
-            if self.game.players_names[1 - id] != "":
-                self.game.state = "ready"
+            if self.game.players_names[1 - id] != None:
+                self.game.state = GameState.READY
 
     def move(self, id, index):
         pass 
