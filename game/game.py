@@ -24,3 +24,6 @@ class Game():
         self.answer = "yEs."
         self.scores = [0, 0]
 
+    def reset_board(self):
+        self.board = [["B" for x in range(self.col)] for y in range(self.row)]
+

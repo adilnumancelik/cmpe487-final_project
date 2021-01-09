@@ -112,7 +112,7 @@ class GameController():
                         for i in range(3):
                             sequence_coordinates.append([x - (i - 1) * direction[0], y - (i - 1) * direction[1]])
                             
-                            if sequence_coordinates[-1][0] < 0 or sequence_coordinates[-1][1] < 0 or
+                            if sequence_coordinates[-1][0] < 0 or sequence_coordinates[-1][1] < 0 or \
                                 sequence_coordinates[-1][0] >= self.game.row or sequence_coordinates[-1][1] >= self.game.col:
                                 sequence = "NOO"
                                 break
