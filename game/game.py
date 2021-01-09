@@ -14,16 +14,16 @@ class Game():
         self.col = col
         self.row = row
         # Initially board is full of "Blank" places.
-        self.board = [["B" for x in range(col)] for y in range(row)]
+        self.board = [["" for x in range(col)] for y in range(row)]
         self.state = GameState.WAITING
         self.players_names = [None, None]
         self.complete_lines = []
         self.turn = 1
-        self.question = "Hey?"
+        self.question = "Wait your opponent."
         self.question_uuid = ""
         self.answer = "yEs."
         self.scores = [0, 0]
 
     def reset_board(self):
-        self.board = [["B" for x in range(self.col)] for y in range(self.row)]
+        self.board = [["" for x in range(self.col)] for y in range(self.row)]
 

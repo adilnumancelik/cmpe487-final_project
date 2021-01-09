@@ -11,6 +11,7 @@ class GameController():
     def __init__(self):
         self.game = Game(10, 10)
         self.player_id = -1
+        self.UPDATE_FLAG = False
 
     def process_message(self, inc_message):
         
@@ -20,3 +21,4 @@ class GameController():
                 self.player_id = int(inc_message_o["PAYLOAD"])
         except:
             self.game = pickle.loads(inc_message)
+            self.UPDATE_FLAG = True
