@@ -33,15 +33,29 @@ class GameController():
     def enter_name(self, id, name):
         with self.lock:
             self.game.players_names[id] = name
-
+            send_id(id)
             if self.game.players_names[1 - id] != None:
                 self.game.state = GameState.READY
                 notify_players()
 
-    
+
     def notify_players(self):
-        for conn in active_connections:
-            conn.sendall(pickle.dumps(self.game))
+        message = {
+            "TYPE": "GAME",
+            "PAYLOAD": pickle.dumps(self.game)
+        }
+        for conn in self.active_connections:
+            conn.sendall(json.dumps(message))
+
+    def send_id(self, id):
+        conn = self.active_connections[id]
+
+        message = {
+            "TYPE": "ID",
+            "PAYLOAD": id
+        }
+
+        conn.sendall(json.dumps(message))
 
 
     def move(self, id, index):
