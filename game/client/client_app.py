@@ -5,10 +5,7 @@ import socket
 import threading
 import json
 from game_controller import GameController
-# import Tkinter
-# import tkMessageBox
-
-
+from tkinter import * 
 
 def send_message(message_to_send):
     try:
@@ -33,6 +30,40 @@ def listen_to_server():
             print(e)
             return False   
 
+# Initialize game.
+control = GameController()
+
+# Initialize GUI
+board = Tk()
+def move():
+    pass
+    #Label(board, text=f"{i}, {j}").pack()
+
+
+q=Label(board, text=control.game.question, width="15", height="4").grid(row=0, column=0)
+a=Entry(board, width="10")
+a.grid(row=1, column=0)
+
+
+def answer(event):
+    text = "xd"
+    ans = a.get()
+    if ans == control.game.answer:
+        text = "Correct answer."
+    else:
+        text = "Wrong answer."
+    Label(board, text=text).grid(row = 3, column = 0)
+
+b=Button(board, text = "Click here to answer.", command = answer, width = "15", height = "4").grid(row = 2, column=0)
+a.bind('<Key-Return>',answer)
+
+for i in range(control.game.col):
+    for j in range(control.game.row):
+        Button(board, text = control.game.board[i][j], command = move, width = "15", height = "4").grid(row = i, column=j+2)
+
+board.mainloop()
+
+'''
 # Find my ip.
 f = requests.request('GET', 'http://myip.dnsomatic.com')
 MY_IP = str(f.text)
@@ -62,27 +93,15 @@ message_object= {"TYPE": "NAME","PAYLOAD": PLAYER_NAME}
 message=json.dumps(message_object)
 send_message(message)
 
-
-
-
-''''
 # Initialize GUI
-top = Tkinter.Tk()
+root = Tk()  
+# Code to add widget will go here…….. 
+for i in range(control.game.col):
+    for j in range(control.game.row):
+        w = Label(root, text = control.game.board[i][j], width = "20", height = "5")  
+        w.grid(row = i, column=j)  
+root.mainloop()
 
-def helloCallBack():
-   tkMessageBox.showinfo( "Hello Python", "Hello World")
-
-B = Tkinter.Button(top, text ="Hello", command = helloCallBack)
-
-B.pack()
-top.mainloop()
-'''
-i = 0
-
-while i<4:
-    time.sleep(5)
-    print(control.game.board)
-    print(control.player_id)
-    i+=1
-
+# Join the listening thread.
 y.join()
+'''
