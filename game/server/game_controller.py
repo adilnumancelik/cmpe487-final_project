@@ -1,10 +1,11 @@
 import threading
 import pickle
-
+import json
 import sys
 sys.path.append('..')
 
 from game import Game, GameState
+from utils import string_to_byte
 
 class GameController():
 
@@ -33,7 +34,7 @@ class GameController():
     def enter_name(self, id, name):
         with self.lock:
             self.game.players_names[id] = name
-            send_id(id)
+            self.send_id(id)
             if self.game.players_names[1 - id] != None:
                 self.game.state = GameState.READY
                 notify_players()
@@ -45,7 +46,7 @@ class GameController():
             "PAYLOAD": pickle.dumps(self.game)
         }
         for conn in self.active_connections:
-            conn.sendall(json.dumps(message))
+            conn.sendall(string_to_byte(json.dumps(message)))
 
     def send_id(self, id):
         conn = self.active_connections[id]
@@ -55,7 +56,7 @@ class GameController():
             "PAYLOAD": id
         }
 
-        conn.sendall(json.dumps(message))
+        conn.sendall(string_to_byte(json.dumps(message)))
 
 
     def move(self, id, index):

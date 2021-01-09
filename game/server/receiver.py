@@ -16,11 +16,10 @@ def accept_connections():
     print(f"Start to listen PORT: {PORT}")
     while True:
       conn, addr = server.accept()
-      with conn:
-        print(f"New connection request from {addr}")
+      print(f"New connection request from {addr}")
 
-        player_id = controller.add_connection(conn)
-        threading.Thread(target=threaded_client, args=(conn, controller, player_id), daemon=True).start()
+      player_id = controller.add_connection(conn)
+      threading.Thread(target=threaded_client, args=(conn, controller, player_id), daemon=True).start()
 
 
 def threaded_client(conn, controller, id):
