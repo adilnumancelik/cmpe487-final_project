@@ -67,7 +67,7 @@ class GameController():
         number_2 = rand.randint(1, limit)
 
         question = str(number_1) + operator + str(number_2)
-        answer = eval(question)
+        answer = str(eval(question))
 
         with self.lock:
             self.game.state = GameState.QUESTION
