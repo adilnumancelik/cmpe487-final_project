@@ -30,11 +30,13 @@ def accept_connections():
 
 def threaded_client(conn, controller, id):
   while True:
-    data = conn.recv(1024)
-    if not data:
+    data = None
+    try:
+      data = conn.recv(1024)
+      assert data
+    except:
       print(f"Player with {id} has been disconnected.")
       controller.remove_player(id)
-      break
           
     message = json.loads(utils.byte_to_string(data))
     print(f"Receive message from Player {id}: {message}")
