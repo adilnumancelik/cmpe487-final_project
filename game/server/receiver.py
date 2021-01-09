@@ -19,8 +19,8 @@ def accept_connections():
       with conn:
         print(f"New connection request from {addr}")
 
-        controller.add_connection(conn)          
-        threading.Thread(target=threaded_client, args=(conn, controller, contoller.get_connections_cnt()), daemon=True).start()
+        player_id = controller.add_connection(conn)
+        threading.Thread(target=threaded_client, args=(conn, controller, player_id), daemon=True).start()
 
 
 def threaded_client(conn, controller, id):
@@ -28,6 +28,7 @@ def threaded_client(conn, controller, id):
     data = conn.recv(1024)
     if not data:
       print(f"Player with {id} has been disconnected.")
+      game_controller.remove_player(id)
       break
           
     message = json.loads(utils.byte_to_string(data))
