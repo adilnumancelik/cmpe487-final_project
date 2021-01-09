@@ -20,5 +20,7 @@ class Game():
         self.complete_lines = []
         self.turn = 1
         self.question = "Hey?"
+        self.question_uuid = ""
         self.answer = "yEs."
+        self.scores = [0, 0]
 
