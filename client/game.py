@@ -1,6 +1,8 @@
+from enum import Enum
+
 class Game():
-    state = "waiting"
-    players_names = ["fhs2lkh21sda.6fs231", "fhs2lkh21sda.6fs231"]
+    state = GameState.WAITING
+    players_names = [None, None]
     board = [][]
     col = 0
     row = 0
@@ -17,3 +19,7 @@ class Game():
 
     
     
+class GameState(Enum):
+    WAITING = 1
+    QUESTION = 2
+    MOVE = 3
