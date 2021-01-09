@@ -1,7 +1,6 @@
 import pickle
 import client_app
 
-
 class GameController():
 
     def __init__(self):
