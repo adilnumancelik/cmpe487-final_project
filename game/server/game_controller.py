@@ -43,9 +43,17 @@ class GameController():
 
 
     def notify_players(self):
+
+        def connection_thread(self, conn):
+            conn.sendall(pickle.dumps(self.game))
+
         for conn in self.active_connections:
             if conn:
-                conn.sendall(pickle.dumps(self.game))
+                threading.Thread(target=connection_thread, args=(self, conn), daemon=True).start()
+
+        # for conn in self.active_connections:
+        #     if conn:
+        #         conn.sendall(pickle.dumps(self.game))
 
 
     def genarate_question(self):
@@ -65,8 +73,6 @@ class GameController():
             self.game.question = question
             self.answer = answer
         
-        notify_players()
-
 
     def send_id(self, id):
         conn = self.active_connections[id]
@@ -85,10 +91,12 @@ class GameController():
                 conn.close()
 
 
-    def calculate_score(self, id, coordinate_x, coordinate_y):
+    def calculate_score(self, id, coordinate_x, coordinate_y, character):
         directions = [[-1, 0], [-1, -1], [0, -1], [1, -1]]
 
         with self.lock:
+            self.game.board[coordinate_x][coordinate_y] = character
+
             for x in range(coordinate_x - 1, coordinate_x + 2):
                 for y in range(coordinate_y - 1, coordinate_y + 2):
                     for direction in directions:
@@ -102,14 +110,15 @@ class GameController():
                             self.complete_lines.append(sequence_coordinates)
 
     def move(self, id, move):
-        coordinate_x, coordinate_y, character = move
-
-        with self.lock:
-            self.game.board[coordinate_x][coordinate_y] = character
-
-        self.calculate_score(id)
+        coordinate_x, coordinate_y, character = move            
+        
+        self.calculate_score(id, coordinate_x, coordinate_y, character)
+        self.genarate_question()
         self.notify_players()
-
     
-    # def check_answer(self, id, index):
-    #     pass
+    def give_turn(self, id):
+        with self.lock:
+            self.game.state = GameState.MOVE
+            self.game.turn = id
+        
+        self.notify_players()
