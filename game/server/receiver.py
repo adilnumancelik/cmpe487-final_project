@@ -48,6 +48,6 @@ def threaded_client(conn, controller, id):
     elif message["TYPE"] == "MOVE":
       controller.move(id, message["PAYLOAD"])
     elif message["TYPE"] == "ANSWER":
-      controller.give_turn(id)
+      controller.give_turn(id, message["PAYLOAD"])
 
 accept_connections()

@@ -3,8 +3,9 @@ import pickle
 import json
 import sys
 import rand
-sys.path.append('..')
+import uuid
 
+sys.path.append('..')
 from game import Game, GameState
 from utils import string_to_byte, byte_to_string
 
@@ -29,7 +30,7 @@ class GameController():
             self.active_connections[id] = None
             self.game.players_names[id] = None
 
-        self.genarate_question()
+        self.generate_question()
         self.notify_players()
 
 
@@ -56,7 +57,7 @@ class GameController():
         #         conn.sendall(pickle.dumps(self.game))
 
 
-    def genarate_question(self):
+    def generate_question(self):
         operator_list = ["+", "-", "*"]
         operator = rand.choice(operator_list):
 
@@ -72,6 +73,7 @@ class GameController():
             self.game.state = GameState.QUESTION
             self.game.question = question
             self.answer = answer
+            self.question_uuid = str(uuid.uuid4())
         
 
     def send_id(self, id):
@@ -113,11 +115,13 @@ class GameController():
         coordinate_x, coordinate_y, character = move            
         
         self.calculate_score(id, coordinate_x, coordinate_y, character)
-        self.genarate_question()
+        self.generate_question()
         self.notify_players()
     
-    def give_turn(self, id):
+    def give_turn(self, id, question_uuid):
         with self.lock:
+            if self.game.state != GameState.QUESTION or self.game.question_uuid != question_uuid:
+                return 
             self.game.state = GameState.MOVE
             self.game.turn = id
         
