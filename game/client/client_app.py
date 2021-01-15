@@ -24,12 +24,12 @@ def listen_to_server():
         data = None
         if len(packets) > 0:
             print(packets[0])
-            data = packets[0]
+            data = packets[-1]
             packets.pop()
         else:
             try:
                 # Receive message.
-                from_server = SERVER.recv(1024)
+                from_server = SERVER.recv(1024).rstrip()
                 print(from_server)
                 packets = from_server.split(b"\n")
                 print(packets)
