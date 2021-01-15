@@ -54,7 +54,7 @@ class GameController():
                 for conn in self.active_connections:
                     if conn:
                         threading.Thread(target=connection_thread, args=(self, conn), daemon=True).start()
-                time.sleep(0.1)
+                time.sleep(0.2)
 
         with self.lock:
             self.game.players_names[id] = name
@@ -149,7 +149,7 @@ class GameController():
                             self.game.scores[id] += 1
                             self.game.complete_lines.append(sequence_coordinates)
                             for coordinate in sequence_coordinates:
-                                self.game.marked_boxes.add(coordinate)
+                                self.game.marked_boxes.add(coordinate[0] * self.game.col + coordinate[1])
 
     def move(self, id, move):
         with self.lock:

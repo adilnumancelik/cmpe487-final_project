@@ -33,7 +33,6 @@ def threaded_client(conn, controller, id):
   while True:
     data = None
     try:
-      print("Waiting...")
       data = conn.recv(1024)
       assert data
     except:
