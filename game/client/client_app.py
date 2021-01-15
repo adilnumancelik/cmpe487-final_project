@@ -28,11 +28,11 @@ def listen_to_server():
             
             timestamp = time.time()
             # If message is a question message, send the acknowledgement.
-            if question_id != "-1":
+            if question_id != "-1" or question_id != "CAL":
                 ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
                 ack=json.dumps(ack_object)
                 send_message(ack)
-            elif question_id != "CAL"
+            elif question_id == "CAL":
                 ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
                 ack=json.dumps(ack_object)
                 send_message(ack)
@@ -162,7 +162,7 @@ def answer(event):
 # Set label for question.
 question_var = StringVar()
 question_var.set(control.game.question)
-question=Label(board, textvariable=question_var, font=(None, 20), width="8", height="2").grid(row=0, column=0, padx=5, pady=5)
+question=Label(board, textvariable=question_var, font=(None, 20), width="20", height="2").grid(row=0, column=0, padx=5, pady=5)
 
 # Set input for answer.
 answer_form=Entry(board, width="10")
