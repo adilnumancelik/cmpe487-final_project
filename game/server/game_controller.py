@@ -12,7 +12,7 @@ from utils import string_to_byte, byte_to_string
 
 class GameController():
 
-    MAX_RECEIVE_TIME_DIFFERENCE = 0.050 # in seconds
+    MAX_RECEIVE_TIME_DIFFERENCE = 0.005 # in seconds
 
     def __init__(self):
         self.active_connections = [None, None] 
@@ -20,6 +20,8 @@ class GameController():
         self.lock = threading.Lock()
         self.receive_question_ts = [None, None]
         self.both_players_received = False
+        self.calibration_acks = [[], []]
+        self.ts_difference = 0 # Average difference between timestamps of player 0 and 1.
 
 
     def add_connection(self, conn):
@@ -36,17 +38,33 @@ class GameController():
             self.active_connections[id] = None
             self.game.players_names[id] = None
             self.game.reset_board()
-
+            self.calibration_acks = [[], []]
+            self.ts_difference = 0
 
 
     def enter_name(self, id, name):
+        ready = False
         with self.lock:
             self.game.players_names[id] = name
             self.send_id(id)
 
-        if self.game.players_names[1 - id] != None:
-            self.generate_question()
-            self.notify_players()
+            if self.game.players_names[1 - id] != None:
+                ready = True
+
+        if ready:
+            threading.Thread(target=self.calibrate_timestamps, args=(), daemon=True).start()
+
+
+    def calibrate_timestamps(self):
+        def connection_thread(self, conn):
+            message = json.dumps({"TYPE": "CALIBRATION"})
+            conn.sendall(string_to_byte(message))
+
+        for i in range(1, 11):
+            for conn in self.active_connections:
+                if conn:
+                    threading.Thread(target=connection_thread, args=(self, conn), daemon=True).start()
+            time.sleep(0.1)
 
 
     def notify_players(self):
@@ -82,7 +100,7 @@ class GameController():
             self.receive_question_ts = [None, None]
             self.both_players_received = False
 
-        print("Generated the Question: " + question)
+        print("Generated the Question: " + question +  " / UUID: " + self.game.question_uuid)
 
     def send_id(self, id):
         conn = self.active_connections[id]
@@ -141,18 +159,24 @@ class GameController():
     
     def give_turn(self, id, question_uuid):
         with self.lock:
+            print(self.game.state, self.game.question_uuid)
             if self.game.state != GameState.QUESTION or self.game.question_uuid != question_uuid:
                 return 
             self.game.state = GameState.MOVE
             self.game.turn = id
         
         self.notify_players()
+    
+    # Returns the normalized timestamp difference between acknowledgment of two players in seconds. 
+    def get_timestamp_diff(self):
+        return abs(self.receive_question_ts[0] - self.receive_question_ts[1] - self.ts_difference)
 
     def check_question_ack(self, id, timestamp, uuid):
         with self.lock:
             if self.game.question_uuid == uuid:
                 self.receive_question_ts[id] = timestamp
-                if self.receive_question_ts[1 - id]  and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= self.MAX_RECEIVE_TIME_DIFFERENCE:
+                if self.receive_question_ts[1 - id]  and self.get_timestamp_diff() <= self.MAX_RECEIVE_TIME_DIFFERENCE:
+                    print("Both player has received the question " + uuid)
                     self.both_players_received = True
                     return
             else:
@@ -161,10 +185,29 @@ class GameController():
         time.sleep(self.MAX_RECEIVE_TIME_DIFFERENCE)
 
         with self.lock:
-            if self.receive_question_ts[1 - id] and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= self.MAX_RECEIVE_TIME_DIFFERENCE:
+            if self.receive_question_ts[1 - id] and self.get_timestamp_diff() <= self.MAX_RECEIVE_TIME_DIFFERENCE:
                 self.both_players_received = True
+                print("Both player has received the question " + uuid)
                 return
 
         self.generate_question()
         self.notify_players()
+
+    def add_calibration_ack(self, id, timestamp):
+
+        ready_to_start = False
+        with self.lock:
+
+            if len(self.calibration_acks[id]) < 10:
+                self.calibration_acks[id].append(timestamp)
+
+            if len(self.calibration_acks[id]) == 10 and len(self.calibration_acks[1 - id]) == 10:
+                self.ts_difference = (sum(self.calibration_acks[id]) - sum(self.calibration_acks[1 - id])) / 10
+                ready_to_start = True
+                print("Calculated time difference in seconds is: ", self.ts_difference)
+        
+        if ready_to_start:
+            self.generate_question()
+            self.notify_players()
+
      

@@ -11,6 +11,7 @@ PORT = 12345
 def accept_connections():
   controller = GameController()
   with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(('0.0.0.0', PORT)) 
     server.listen()
     print(f"Start to listen PORT: {PORT}")
@@ -37,7 +38,7 @@ def threaded_client(conn, controller, id):
     except:
       print(f"Player with {id} has been disconnected.")
       controller.remove_player(id)
-          
+      
     message = json.loads(utils.byte_to_string(data))
     print(f"Receive message from Player {id}: {message}")
 
@@ -53,5 +54,6 @@ def threaded_client(conn, controller, id):
       controller.give_turn(id, message["PAYLOAD"])
     elif message["TYPE"] == "ACK":
       controller.check_question_ack(id, message["TIMESTAMP"], message["QUESTION"])
-
+    elif message["TYPE"] == "CALIBRATION":
+      controller.add_calibration_ack(id, message["TIMESTAMP"])
 accept_connections()
