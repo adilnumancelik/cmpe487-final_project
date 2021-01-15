@@ -12,7 +12,7 @@ from utils import string_to_byte, byte_to_string
 
 class GameController():
 
-    MAX_RECEIVE_TIME_DIFFERENCE = 0.005 # in seconds
+    MAX_RECEIVE_TIME_DIFFERENCE = 0.050 # in seconds
 
     def __init__(self):
         self.active_connections = [None, None] 
@@ -44,6 +44,18 @@ class GameController():
 
     def enter_name(self, id, name):
         ready = False
+
+        def calibrate_timestamps(self):
+            def connection_thread(self, conn):
+                message = json.dumps({"TYPE": "CALIBRATION"})
+                conn.sendall(string_to_byte(message))
+
+            for i in range(1, 11):
+                for conn in self.active_connections:
+                    if conn:
+                        threading.Thread(target=connection_thread, args=(self, conn), daemon=True).start()
+                time.sleep(0.1)
+
         with self.lock:
             self.game.players_names[id] = name
             self.send_id(id)
@@ -52,19 +64,10 @@ class GameController():
                 ready = True
 
         if ready:
-            threading.Thread(target=self.calibrate_timestamps, args=(), daemon=True).start()
+            threading.Thread(target=calibrate_timestamps, args=(self,), daemon=True).start()
+            print("Hey")
 
 
-    def calibrate_timestamps(self):
-        def connection_thread(self, conn):
-            message = json.dumps({"TYPE": "CALIBRATION"})
-            conn.sendall(string_to_byte(message))
-
-        for i in range(1, 11):
-            for conn in self.active_connections:
-                if conn:
-                    threading.Thread(target=connection_thread, args=(self, conn), daemon=True).start()
-            time.sleep(0.1)
 
 
     def notify_players(self):
@@ -145,6 +148,8 @@ class GameController():
                         if sequence == "SOS" and sequence_coordinates not in self.game.complete_lines:
                             self.game.scores[id] += 1
                             self.game.complete_lines.append(sequence_coordinates)
+                            for coordinate in sequence_coordinates:
+                                self.game.marked_boxes.add(coordinate)
 
     def move(self, id, move):
         with self.lock:
