@@ -33,6 +33,6 @@ class GameController():
     def isFinished(self):
         for i in range(self.game.col):
             for j in range(self.game.row):
-                if self.board[i][j] == "":
+                if self.game.board[i][j] == "":
                     return False
         return True

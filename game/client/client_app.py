@@ -181,9 +181,9 @@ for i in range(control.game.col):
 def update():
     if control.UPDATE_FLAG == True:  
         if control.isFinished():
-            if int(your_score.get()) > int(opponents_score.get()):
+            if control.game.scores[control.player_id] > control.game.scores[1-control.player_id]:
                 feedback_message.set("Game over. You won.")
-            elif int(your_score.get()) < int(opponents_score.get()):
+            elif control.game.scores[control.player_id] < control.game.scores[1-control.player_id]:
                 feedback_message.set(f"Game over. You lost.")
             else:
                 feedback_message.set(f"Game over. Tied.")
