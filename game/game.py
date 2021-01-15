@@ -23,6 +23,7 @@ class Game():
         self.question_uuid = ""
         self.answer = "yEs."
         self.scores = [0, 0]
+        self.marked_boxes = set([])
 
     def reset_board(self):
         self.board = [["" for x in range(self.col)] for y in range(self.row)]
