@@ -20,6 +20,8 @@ class GameController():
             if inc_message_o["TYPE"] == "ID":
                 self.player_id = int(inc_message_o["PAYLOAD"])
                 return "-1"
+            elif inc_message_o["TYPE"] == "CALIBRATION":
+                return "CAL"
         except:
             self.game = pickle.loads(inc_message)
             self.UPDATE_FLAG = True

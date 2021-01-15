@@ -26,13 +26,16 @@ def listen_to_server():
             # Process message.
             question_id = control.process_message(from_server)
             
+            timestamp = time.time()
             # If message is a question message, send the acknowledgement.
             if question_id != "-1":
-                timestamp = time.time()
                 ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
                 ack=json.dumps(ack_object)
                 send_message(ack)
-            
+            elif question_id != "CAL"
+                ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
+                ack=json.dumps(ack_object)
+                send_message(ack)
         except Exception as e: 
             print(e)
             return False   
@@ -98,7 +101,8 @@ MY_IP = str(f.text)
 
 # Construct connection.
 PORT = 12345
-SERVER_IP = "3.230.114.17"
+SERVER_IP = "18.198.166.19"
+# SERVER_IP = "3.230.114.17"
 SERVER = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the server.
@@ -158,7 +162,7 @@ def answer(event):
 # Set label for question.
 question_var = StringVar()
 question_var.set(control.game.question)
-question=Label(board, textvariable=question_var, width="25", height="4").grid(row=0, column=0)
+question=Label(board, textvariable=question_var, font=(None, 20), width="8", height="2").grid(row=0, column=0, padx=5, pady=5)
 
 # Set input for answer.
 answer_form=Entry(board, width="10")
@@ -168,13 +172,13 @@ answer_form.bind('<Key-Return>', answer)
 # Set label for feedback.
 feedback_message = StringVar()
 feedback_message.set("Type answer, press Enter.")
-feedback = Label(board, textvariable=feedback_message).grid(row = 2, column = 0)
+feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 2, column = 0, padx=5, pady=5)
 
 
-s = Radiobutton(board, text='S', variable=choice, value='S')
-o = Radiobutton(board, text='O', variable=choice, value='O')
-s.grid(row=3, column=0)
-o.grid(row=4, column=0)
+s = Radiobutton(board, text='S', font=(None, 20), variable=choice, value='S')
+o = Radiobutton(board, text='O', font=(None, 20), variable=choice, value='O')
+s.grid(row=3, column=0, padx=5, pady=5)
+o.grid(row=4, column=0, padx=5, pady=5)
 
 '''
 # Set button for picking S or O.
@@ -188,8 +192,8 @@ your_score=StringVar()
 opponents_score=StringVar()
 your_score.set(f"Your score: {control.game.scores[control.player_id]}")
 opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}") 
-your = Label(board, textvariable=your_score).grid(row = 5, column = 0)
-opponent = Label(board, textvariable=opponents_score).grid(row = 6, column = 0)
+your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5)
+opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 6, column = 0, padx=5, pady=5)
 
 
 # Set board button variables.
@@ -204,8 +208,9 @@ buttons=[]
 for i in range(control.game.col):
     for j in range(control.game.row):
         action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], command = action_with_arg, width = "15", height = "4"))
-        buttons[i*control.game.col+j].grid(row = i, column=j+2)
+        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
+        buttons[i*control.game.col+j].grid(row = i, column=j+2, padx=5, pady=5)
+        buttons[i*control.game.col+j]["state"] = "disabled"
 
 def update():
     if control.UPDATE_FLAG == True:  
@@ -246,3 +251,6 @@ board.mainloop()
 
 # Join the listening thread.
 y.join()
+
+# Closing the connection.
+SERVER.close()
