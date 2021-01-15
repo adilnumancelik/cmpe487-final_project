@@ -119,8 +119,8 @@ def answer(event):
     feedback_message.set(text)
 
 def exx():
+    board.destroy()
     y.join()
-
     # Closing the connection.
     SERVER.close()
     sys.exit()
@@ -182,6 +182,39 @@ for i in range(control.game.col):
 
 def update():
     if control.UPDATE_FLAG == True:  
+        # Set feedback message and question variables.
+        if control.game.state == GameState.QUESTION:
+            feedback_message.set("Type answer, press Enter.")
+            question_var.set(control.game.question)
+        elif control.game.state == GameState.MOVE:
+            question_var.set("") 
+            if control.game.turn == control.player_id:
+                feedback_message.set("Make your move.")
+            else:
+                feedback_message.set("Wait, it is not your turn.")
+        elif control.game.state == GameState.WAITING:
+            question_var.set("")
+            feedback_message.set("Wait your opponent to connect.")
+
+        your_score.set(f"Your score: {control.game.scores[control.player_id]}")
+        opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}")             
+        
+        # Delete content of answer form.
+        answer_form.delete(0,END)
+        
+        # Update board button and text color variables.
+        
+        for i in range(control.game.col):
+            for j in range(control.game.row):
+                coor = i*control.game.col+j 
+                button_vars[i*control.game.col+j].set(control.game.board[i][j])
+                if control.game.state != GameState.MOVE or control.game.turn != control.player_id or control.game.board[i][j] != "":
+                    buttons[i*control.game.col+j]["state"] = "disabled"
+                else:
+                    buttons[i*control.game.col+j]["state"] = "normal"
+                if coor in control.game.marked_boxes:
+                    buttons[i*control.game.col+j].configure(disabledforeground = "red")
+        
         if control.isFinished():
             if control.game.scores[control.player_id] > control.game.scores[1-control.player_id]:
                 feedback_message.set("Game over. You won.")
@@ -189,40 +222,6 @@ def update():
                 feedback_message.set(f"Game over. You lost.")
             else:
                 feedback_message.set(f"Game over. Tied.")
-        else:
-
-            # Set feedback message and question variables.
-            if control.game.state == GameState.QUESTION:
-                feedback_message.set("Type answer, press Enter.")
-                question_var.set(control.game.question)
-            elif control.game.state == GameState.MOVE:
-                question_var.set("") 
-                if control.game.turn == control.player_id:
-                    feedback_message.set("Make your move.")
-                else:
-                    feedback_message.set("Wait, it is not your turn.")
-            elif control.game.state == GameState.WAITING:
-                question_var.set("")
-                feedback_message.set("Wait your opponent to connect.")
-
-            your_score.set(f"Your score: {control.game.scores[control.player_id]}")
-            opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}")             
-            
-            # Delete content of answer form.
-            answer_form.delete(0,END)
-            
-            # Update board button and text color variables.
-            
-            for i in range(control.game.col):
-                for j in range(control.game.row):
-                    coor = i*control.game.col+j 
-                    button_vars[i*control.game.col+j].set(control.game.board[i][j])
-                    if control.game.state != GameState.MOVE or control.game.turn != control.player_id or control.game.board[i][j] != "":
-                        buttons[i*control.game.col+j]["state"] = "disabled"
-                    else:
-                        buttons[i*control.game.col+j]["state"] = "normal"
-                    if coor in control.game.marked_boxes:
-                        buttons[i*control.game.col+j].configure(disabledforeground = "red")
 
         control.UPDATE_FLAG = False
 
