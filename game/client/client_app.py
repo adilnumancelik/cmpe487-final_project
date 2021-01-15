@@ -170,8 +170,10 @@ feedback_message.set("Type answer, press Enter.")
 feedback = Label(board, textvariable=feedback_message).grid(row = 2, column = 0)
 
 
-s = Radiobutton(board, text='S', variable=choice, value='S').pack()
-o = Radiobutton(board, text='O', variable=choice, value='O').pack()
+s = Radiobutton(board, text='S', variable=choice, value='S')
+o = Radiobutton(board, text='O', variable=choice, value='O')
+s.grid(row=3, column=0)
+o.grid(row=4, column=0)
 
 '''
 # Set button for picking S or O.
