@@ -21,16 +21,18 @@ def send_message(message_to_send):
 def listen_to_server():
     while True:
         try:
+            # Receive message.
             from_server = SERVER.recv(4096)
+            # Process message.
+            question_id = control.process_message(from_server)
             
-            # Send the timestamp immediately.
-            timestamp = time.time()
-            ack_object= {"TYPE": "ACK","PAYLOAD": timestamp}
-            ack=json.dumps(ack_object)
-            send_message(ack)
-
-            # Process the incoming message.
-            control.process_message(from_server)
+            # If message is a question message, send the acknowledgement.
+            if question_id != "-1":
+                timestamp = time.time()
+                ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
+                ack=json.dumps(ack_object)
+                send_message(ack)
+            
         except Exception as e: 
             print(e)
             return False   
@@ -123,19 +125,14 @@ send_message(message)
 board = Tk()
 board.title("S0S")
 
-SorO = False
-
-def S():
-    global SorO
-    SorO = True
-def O():
-    global SorO
-    SorO = False
+# Variable that holds if user selected S or O.
+choice = StringVar()
 
 #Function to handle moves. 
 def move(i,j):
     message_object = "xd"
-    if SorO:
+    SorO = choice.get()
+    if SorO == 'S':
         message_object= {"TYPE": "MOVE","PAYLOAD": [i, j, "S"]}
     else:
         message_object= {"TYPE": "MOVE","PAYLOAD": [i, j, "O"]}
@@ -172,12 +169,17 @@ feedback_message = StringVar()
 feedback_message.set("Type answer, press Enter.")
 feedback = Label(board, textvariable=feedback_message).grid(row = 2, column = 0)
 
+
+s = Radiobutton(board, text='S', variable=choice, value='S').pack()
+o = Radiobutton(board, text='O', variable=choice, value='O').pack()
+
+'''
 # Set button for picking S or O.
 a=Button(board, text="Pick S", command = S, width="25", height="4")
 a.grid(row=3, column=0)
 b=Button(board, text="Pick O", command = O, width="25", height="4")
 b.grid(row=4, column=0)
-
+'''
 # Set score labels.
 your_score=StringVar()
 opponents_score=StringVar()

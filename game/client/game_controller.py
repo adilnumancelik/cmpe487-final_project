@@ -9,7 +9,7 @@ from game import Game, GameState
 class GameController():
 
     def __init__(self):
-        self.game = Game(10, 10)
+        self.game = Game(7, 7)
         self.player_id = 0
         self.UPDATE_FLAG = False
 
@@ -19,6 +19,11 @@ class GameController():
             inc_message_o=json.loads(inc_message)
             if inc_message_o["TYPE"] == "ID":
                 self.player_id = int(inc_message_o["PAYLOAD"])
+                return "-1"
         except:
             self.game = pickle.loads(inc_message)
             self.UPDATE_FLAG = True
+            if self.game.state == GameState.QUESTION:
+                return self.game.question_uuid
+            else:
+                return "-1"
