@@ -127,6 +127,7 @@ board.title("S0S")
 
 # Variable that holds if user selected S or O.
 choice = StringVar()
+choice.set('S')
 
 #Function to handle moves. 
 def move(i,j):
@@ -232,6 +233,10 @@ def update():
         for i in range(control.game.col):
             for j in range(control.game.row):
                 button_vars[i*control.game.col+j].set(control.game.board[i][j])
+                if control.game.state != GameState.MOVE or control.game.turn != control.player_id:
+                    buttons[i*control.game.col+j]["state"] = "disabled"
+                else:
+                    buttons[i*control.game.col+j]["state"] = "normal"
 
         control.UPDATE_FLAG = False
 
