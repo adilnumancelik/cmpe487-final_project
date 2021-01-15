@@ -41,7 +41,7 @@ def threaded_client(conn, controller, id):
     message = json.loads(utils.byte_to_string(data))
     print(f"Receive message from Player {id}: {message}")
 
-    if "TYPE" not in message or "PAYLOAD" not in message:
+    if "TYPE" not in message:
       print("Unkown type of message :(")
       continue
 

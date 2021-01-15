@@ -77,7 +77,7 @@ class GameController():
             self.game.state = GameState.QUESTION
             self.game.question = question
             self.game.answer = answer
-            self.question_uuid = str(uuid.uuid4())
+            self.game.question_uuid = str(uuid.uuid4())
             self.receive_question_ts = [None, None]
             self.both_players_received = False
 
@@ -151,7 +151,7 @@ class GameController():
         with self.lock:
             if self.game.question_uuid == uuid:
                 self.receive_question_ts[id] = timestamp
-                if self.receive_question_ts[1 - id]  and abs(self.receive_question_ts[1 - id] - timestamp) <= MAX_RECEIVE_TIME_DIFFERENCE:
+                if self.receive_question_ts[1 - id]  and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= MAX_RECEIVE_TIME_DIFFERENCE:
                     self.both_players_received = True
                     return
             else:
@@ -160,7 +160,7 @@ class GameController():
         sleep(MAX_RECEIVE_TIME_DIFFERENCE)
 
         with self.lock:
-            if self.receive_question_ts[1 - id] and abs(self.receive_question_ts[1 - id] - timestamp) <= MAX_RECEIVE_TIME_DIFFERENCE:
+            if self.receive_question_ts[1 - id] and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= MAX_RECEIVE_TIME_DIFFERENCE:
                 self.both_players_received = True
                 return
 
