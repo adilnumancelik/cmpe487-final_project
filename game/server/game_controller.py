@@ -11,10 +11,15 @@ from utils import string_to_byte, byte_to_string
 
 class GameController():
 
+    MAX_RECEIVE_TIME_DIFFERENCE = 0.050 # in seconds
+
     def __init__(self):
         self.active_connections = [None, None] 
-        self.game = Game(10, 10)
+        self.game = Game(7, 7)
         self.lock = threading.Lock()
+        self.receive_question_ts = [None, None]
+        self.both_players_received = False
+
 
     def add_connection(self, conn):
         id = 1
@@ -54,13 +59,9 @@ class GameController():
             if conn:
                 threading.Thread(target=connection_thread, args=(self, conn), daemon=True).start()
 
-        # for conn in self.active_connections:
-        #     if conn:
-        #         conn.sendall(pickle.dumps(self.game))
-
 
     def generate_question(self):
-        print("Generating the Question...")
+        print("Generating New Question...")
         operator_list = ["+", "-", "*"]
         operator = random.choice(operator_list)
 
@@ -77,6 +78,9 @@ class GameController():
             self.game.question = question
             self.game.answer = answer
             self.question_uuid = str(uuid.uuid4())
+            self.receive_question_ts = [None, None]
+            self.both_players_received = False
+
         print("Generated the Question: " + question)
 
     def send_id(self, id):
@@ -121,9 +125,13 @@ class GameController():
 
                         if sequence == "SOS" and sequence_coordinates not in self.game.complete_lines:
                             self.game.scores[id] += 1
-                            self.complete_lines.append(sequence_coordinates)
+                            self.game.complete_lines.append(sequence_coordinates)
 
     def move(self, id, move):
+        with self.lock:
+            if self.game.state != GameState.MOVE or self.game.turn != id or not self.both_players_received:
+                return
+
         coordinate_x, coordinate_y, character = move            
         
         self.calculate_score(id, coordinate_x, coordinate_y, character)
@@ -138,3 +146,24 @@ class GameController():
             self.game.turn = id
         
         self.notify_players()
+
+    def check_question_ack(self, id, timestamp, uuid):
+        with self.lock:
+            if self.game.question_uuid == uuid:
+                self.receive_question_ts[id] = timestamp
+                if self.receive_question_ts[1 - id]  and abs(self.receive_question_ts[1 - id] - timestamp) <= MAX_RECEIVE_TIME_DIFFERENCE:
+                    self.both_players_received = True
+                    return
+            else:
+                return 
+
+        sleep(MAX_RECEIVE_TIME_DIFFERENCE)
+
+        with self.lock:
+            if self.receive_question_ts[1 - id] and abs(self.receive_question_ts[1 - id] - timestamp) <= MAX_RECEIVE_TIME_DIFFERENCE:
+                self.both_players_received = True
+                return
+
+        self.generate_question()
+        self.notify_players()
+     

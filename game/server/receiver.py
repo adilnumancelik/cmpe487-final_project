@@ -51,5 +51,7 @@ def threaded_client(conn, controller, id):
       controller.move(id, message["PAYLOAD"])
     elif message["TYPE"] == "ANSWER":
       controller.give_turn(id, message["PAYLOAD"])
+    elif message["TYPE"] == "ACK":
+      controller.check_question_ack(id, message["TIMESTAMP"], message["QUESTION"])
 
 accept_connections()
