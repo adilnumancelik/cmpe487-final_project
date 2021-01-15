@@ -4,6 +4,7 @@ import json
 import sys
 import random
 import uuid
+import time
 
 sys.path.append('..')
 from game import Game, GameState
@@ -151,16 +152,16 @@ class GameController():
         with self.lock:
             if self.game.question_uuid == uuid:
                 self.receive_question_ts[id] = timestamp
-                if self.receive_question_ts[1 - id]  and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= MAX_RECEIVE_TIME_DIFFERENCE:
+                if self.receive_question_ts[1 - id]  and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= self.MAX_RECEIVE_TIME_DIFFERENCE:
                     self.both_players_received = True
                     return
             else:
                 return 
 
-        sleep(MAX_RECEIVE_TIME_DIFFERENCE)
+        time.sleep(self.MAX_RECEIVE_TIME_DIFFERENCE)
 
         with self.lock:
-            if self.receive_question_ts[1 - id] and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= MAX_RECEIVE_TIME_DIFFERENCE:
+            if self.receive_question_ts[1 - id] and abs(self.receive_question_ts[1 - id] - timestamp) * 1000 <= self.MAX_RECEIVE_TIME_DIFFERENCE:
                 self.both_players_received = True
                 return
 
