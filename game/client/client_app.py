@@ -12,7 +12,7 @@ sys.path.append('..')
 from game import Game, GameState
 
 def send_message(message_to_send):
-    message_to_send=message_to_send+"\n"
+    message_to_send=message_to_send+"xaxaxayarmaW"
     try:
         SERVER.sendall(utils.string_to_byte(message_to_send))
     except:
@@ -29,9 +29,9 @@ def listen_to_server():
         else:
             try:
                 # Receive message.
-                from_server = SERVER.recv(1024).rstrip()
+                from_server = SERVER.recv(1024).rstrip(b"xaxaxayarmaW")
                 print(from_server)
-                packets = from_server.split(b"\n")
+                packets = from_server.split(b"xaxaxayarmaW")
                 print(packets)
                 continue 
             except Exception as e: 
