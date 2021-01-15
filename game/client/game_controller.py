@@ -30,8 +30,8 @@ class GameController():
             else:
                 return "-1"
 
-    def isFinished(self, inc_message):
-        for i in range(self..game.col):
+    def isFinished(self):
+        for i in range(self.game.col):
             for j in range(self.game.row):
                 if self.board[i][j] == "":
                     return False
