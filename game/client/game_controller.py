@@ -14,7 +14,6 @@ class GameController():
         self.UPDATE_FLAG = False
 
     def process_message(self, inc_message):
-        print(inc_message)
         try:
             inc_message_o=json.loads(inc_message)
             if inc_message_o["TYPE"] == "ID":
@@ -24,6 +23,7 @@ class GameController():
                 return "CAL"
         except:
             self.game = pickle.loads(inc_message)
+            print(f"qid {self.game.question_uuid}")
             self.UPDATE_FLAG = True
             if self.game.state == GameState.QUESTION:
                 return self.game.question_uuid

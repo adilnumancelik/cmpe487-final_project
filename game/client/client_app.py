@@ -20,7 +20,6 @@ def send_message(message_to_send):
 
 def listen_to_server():
     while True:
-        i=0
         try:
             # Receive message.
             from_server = SERVER.recv(1024)
@@ -38,8 +37,7 @@ def listen_to_server():
                 ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
                 print(f"{i}+{ack_object}")
                 ack=json.dumps(ack_object)
-                send_message(ack)
-            i+=1
+                send_message(ack)  
         except Exception as e: 
             print(e)
             return False   
@@ -152,7 +150,10 @@ def move(i,j):
 def answer(event):
     text = "xd"
     ans = answer_form.get()
-    if ans == control.game.answer:
+    if control.game.state != GameState.QUESTION:
+        if ans == control.game.answer:
+            text = "Correct but your opponent was faster."
+    elif ans == control.game.answer:
         text = "Correct answer."
         message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid}
         message=json.dumps(message_object)
@@ -211,14 +212,15 @@ text_color_list = []
 buttons=[]
 for i in range(control.game.col):
     for j in range(control.game.row):
-        # Create buttons.
-        action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), fg=text_color.get(), command = action_with_arg, width = "5", height = "2"))
-        buttons[i*control.game.col+j].grid(row = i, column=j+2, padx=5, pady=5)
-        buttons[i*control.game.col+j]["state"] = "disabled"
         # Create text color variables and initially set to black.
         text_color_list.append(StringVar())
         text_color_list[i*control.game.col+j].set('black')
+        # Create buttons.
+        action_with_arg = partial(move, i, j)
+        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), fg=text_color_list[-1].get(), disabledforeground=text_color_list[-1].get(), command = action_with_arg, width = "5", height = "2"))
+        buttons[i*control.game.col+j].grid(row = i, column=j+2, padx=5, pady=5)
+        buttons[i*control.game.col+j]["state"] = "disabled"
+        
 
 def update():
     if control.UPDATE_FLAG == True:  
@@ -245,13 +247,15 @@ def update():
         # Update board button and text color variables.
         for i in range(control.game.col):
             for j in range(control.game.row):
+                coor = i*control.game.col+j 
                 button_vars[i*control.game.col+j].set(control.game.board[i][j])
                 if control.game.state != GameState.MOVE or control.game.turn != control.player_id or control.game.board[i][j] != "":
                     buttons[i*control.game.col+j]["state"] = "disabled"
                 else:
                     buttons[i*control.game.col+j]["state"] = "normal"
-
-                if [i,j] in control.game.marked_boxes:
+                print(coor)
+                print(control.game.marked_boxes)
+                if coor in control.game.marked_boxes:
                     text_color_list[i*control.game.col+j].set('red')
 
         control.UPDATE_FLAG = False
