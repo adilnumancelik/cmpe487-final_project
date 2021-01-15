@@ -14,7 +14,7 @@ class GameController():
         self.UPDATE_FLAG = False
 
     def process_message(self, inc_message):
-        
+        print(inc_message)
         try:
             inc_message_o=json.loads(inc_message)
             if inc_message_o["TYPE"] == "ID":

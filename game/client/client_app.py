@@ -20,9 +20,10 @@ def send_message(message_to_send):
 
 def listen_to_server():
     while True:
+        i=0
         try:
             # Receive message.
-            from_server = SERVER.recv(4096)
+            from_server = SERVER.recv(1024)
             # Process message.
             question_id = control.process_message(from_server)
             
@@ -30,12 +31,15 @@ def listen_to_server():
             # If message is a question message, send the acknowledgement.
             if question_id != "-1" and question_id != "CAL":
                 ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
+                print(f"{i}+{ack_object}")
                 ack=json.dumps(ack_object)
                 send_message(ack)
             elif question_id == "CAL":
                 ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
+                print(f"{i}+{ack_object}")
                 ack=json.dumps(ack_object)
                 send_message(ack)
+            i+=1
         except Exception as e: 
             print(e)
             return False   
@@ -143,8 +147,6 @@ def move(i,j):
         message_object= {"TYPE": "MOVE","PAYLOAD": [i, j, "O"]}
     message=json.dumps(message_object)
     send_message(message)
-    # print(f"{i}, {j}")
-    #Label(board, text=f"{i}, {j}").pack()
 
 # Function to handle answers.
 def answer(event):
@@ -174,7 +176,7 @@ feedback_message = StringVar()
 feedback_message.set("Type answer, press Enter.")
 feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 2, column = 0, padx=5, pady=5)
 
-
+# Radio buttons for choosing S or O.
 s = Radiobutton(board, text='S', font=(None, 20), variable=choice, value='S')
 o = Radiobutton(board, text='O', font=(None, 20), variable=choice, value='O')
 s.grid(row=3, column=0, padx=5, pady=5)
@@ -195,7 +197,6 @@ opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id
 your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5)
 opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 6, column = 0, padx=5, pady=5)
 
-
 # Set board button variables.
 button_vars=[]
 for i in range(control.game.col):
@@ -203,14 +204,21 @@ for i in range(control.game.col):
         button_vars.append(StringVar())
         button_vars[i*control.game.col+j].set(control.game.board[i][j])
 
-# Create board buttons.
+# Create text color list.
+text_color_list = []
+
+# Create board buttons list.
 buttons=[]
 for i in range(control.game.col):
     for j in range(control.game.row):
+        # Create buttons.
         action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
+        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), fg=text_color.get(), command = action_with_arg, width = "5", height = "2"))
         buttons[i*control.game.col+j].grid(row = i, column=j+2, padx=5, pady=5)
         buttons[i*control.game.col+j]["state"] = "disabled"
+        # Create text color variables and initially set to black.
+        text_color_list.append(StringVar())
+        text_color_list[i*control.game.col+j].set('black')
 
 def update():
     if control.UPDATE_FLAG == True:  
@@ -231,17 +239,20 @@ def update():
         your_score.set(f"Your score: {control.game.scores[control.player_id]}")
         opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}")             
         
-        # Input form answer.
-        # answer_form['text']=""
+        # Delete content of answer form.
+        answer_form.delete(0,END)
         
-        # Update board button variables.
+        # Update board button and text color variables.
         for i in range(control.game.col):
             for j in range(control.game.row):
                 button_vars[i*control.game.col+j].set(control.game.board[i][j])
-                if control.game.state != GameState.MOVE or control.game.turn != control.player_id:
+                if control.game.state != GameState.MOVE or control.game.turn != control.player_id or control.game.board[i][j] != "":
                     buttons[i*control.game.col+j]["state"] = "disabled"
                 else:
                     buttons[i*control.game.col+j]["state"] = "normal"
+
+                if [i,j] in control.game.marked_boxes:
+                    text_color_list[i*control.game.col+j].set('red')
 
         control.UPDATE_FLAG = False
 
@@ -254,3 +265,4 @@ y.join()
 
 # Closing the connection.
 SERVER.close()
+sys.exit()
