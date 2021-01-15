@@ -36,20 +36,23 @@ def threaded_client(conn, controller, id):
     if len(packets) > 0:
       data = packets[0]
       packets.pop()
-    try:
-      resp = conn.recv(1024)
-      packets = resp.split()
-      continue 
-    except:
-      print(f"Player with {id} has been disconnected.")
-      controller.remove_player(id)
-      
+    else:
+      try:
+        resp = conn.recv(1024)
+        packets = resp.split(b"\n")
+        continue 
+      except:
+        print(f"Player with {id} has been disconnected.")
+        controller.remove_player(id)
+        return
     message = json.loads(utils.byte_to_string(data))
     print(f"Receive message from Player {id}: {message}")
 
     if "TYPE" not in message:
       print("Unkown type of message :(")
       continue
+
+    print(message)
 
     if message["TYPE"] == "NAME":
       controller.enter_name(id, message["PAYLOAD"])

@@ -48,7 +48,7 @@ class GameController():
         def calibrate_timestamps(self):
             def connection_thread(self, conn):
                 message = json.dumps({"TYPE": "CALIBRATION"})
-                conn.sendall(string_to_byte(message) + b"\n")
+                conn.sendall(string_to_byte(message + "\n"))
 
             for i in range(1, 11):
                 for conn in self.active_connections:
@@ -115,7 +115,7 @@ class GameController():
 
         print(f"Sending ID to the Player {id}")
 
-        conn.sendall(string_to_byte(json.dumps(message)) + b"\n")
+        conn.sendall(string_to_byte(json.dumps(message) + "\n"))
 
 
     def close_connections(self):
