@@ -23,14 +23,14 @@ def listen_to_server():
     while True:
         data = None
         if len(packets) > 0:
-            print(packets[0])
+            # print(packets[-1])
             data = packets[-1]
             packets.pop()
         else:
             try:
                 # Receive message.
                 from_server = SERVER.recv(1024).rstrip(b"xaxaxayarmaW")
-                print(from_server)
+                # print(from_server)
                 packets = from_server.split(b"xaxaxayarmaW")
                 print(packets)
                 continue 
@@ -167,60 +167,60 @@ for i in range(control.game.col):
         button_vars.append(StringVar())
         button_vars[i*control.game.col+j].set(control.game.board[i][j])
 
-# Create text color list.
-text_color_list = []
-
 # Create board buttons list.
 buttons=[]
 for i in range(control.game.col):
     for j in range(control.game.row):
-        # Create text color variables and initially set to black.
-        text_color_list.append(StringVar())
-        text_color_list[i*control.game.col+j].set('black')
         # Create buttons.
         action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), fg=text_color_list[-1].get(), disabledforeground=text_color_list[-1].get(), command = action_with_arg, width = "5", height = "2"))
+        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
         buttons[i*control.game.col+j].grid(row = i, column=j+2, padx=5, pady=5)
         buttons[i*control.game.col+j]["state"] = "disabled"
         
 
 def update():
     if control.UPDATE_FLAG == True:  
-        # Set feedback message and question variables.
-        if control.game.state == GameState.QUESTION:
-            feedback_message.set("Type answer, press Enter.")
-            question_var.set(control.game.question)
-        elif control.game.state == GameState.MOVE:
-            question_var.set("") 
-            if control.game.turn == control.player_id:
-                feedback_message.set("Make your move.")
+        if control.isFinished():
+            if int(your_score.get()) > int(opponents_score.get()):
+                feedback_message.set("Game over. You won.")
+            elif int(your_score.get()) < int(opponents_score.get()):
+                feedback_message.set(f"Game over. You lost.")
             else:
-                feedback_message.set("Wait, it is not your turn.")
-        elif control.game.state == GameState.WAITING:
-            question_var.set("")
-            feedback_message.set("Wait your opponent to connect.")
+                feedback_message.set(f"Game over. Tied.")
+        else:
 
-        your_score.set(f"Your score: {control.game.scores[control.player_id]}")
-        opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}")             
-        
-        # Delete content of answer form.
-        answer_form.delete(0,END)
-        
-        # Update board button and text color variables.
-        for i in range(control.game.col):
-            for j in range(control.game.row):
-                coor = i*control.game.col+j 
-                button_vars[i*control.game.col+j].set(control.game.board[i][j])
-                if control.game.state != GameState.MOVE or control.game.turn != control.player_id or control.game.board[i][j] != "":
-                    buttons[i*control.game.col+j]["state"] = "disabled"
+            # Set feedback message and question variables.
+            if control.game.state == GameState.QUESTION:
+                feedback_message.set("Type answer, press Enter.")
+                question_var.set(control.game.question)
+            elif control.game.state == GameState.MOVE:
+                question_var.set("") 
+                if control.game.turn == control.player_id:
+                    feedback_message.set("Make your move.")
                 else:
-                    buttons[i*control.game.col+j]["state"] = "normal"
-                print(coor)
-                print(control.game.marked_boxes)
-                if coor in control.game.marked_boxes:
-                    print(text_color_list[i*control.game.col+j].get())
-                    text_color_list[i*control.game.col+j].set('red')
-                    print(text_color_list[i*control.game.col+j].get())
+                    feedback_message.set("Wait, it is not your turn.")
+            elif control.game.state == GameState.WAITING:
+                question_var.set("")
+                feedback_message.set("Wait your opponent to connect.")
+
+            your_score.set(f"Your score: {control.game.scores[control.player_id]}")
+            opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}")             
+            
+            # Delete content of answer form.
+            answer_form.delete(0,END)
+            
+            # Update board button and text color variables.
+            
+            for i in range(control.game.col):
+                for j in range(control.game.row):
+                    coor = i*control.game.col+j 
+                    button_vars[i*control.game.col+j].set(control.game.board[i][j])
+                    if control.game.state != GameState.MOVE or control.game.turn != control.player_id or control.game.board[i][j] != "":
+                        buttons[i*control.game.col+j]["state"] = "disabled"
+                    else:
+                        buttons[i*control.game.col+j]["state"] = "normal"
+                    if coor in control.game.marked_boxes:
+                        buttons[i*control.game.col+j].configure(disabledforeground = "red")
 
         control.UPDATE_FLAG = False
 
