@@ -107,6 +107,8 @@ def answer(event):
     if control.game.state != GameState.QUESTION:
         if ans == control.game.answer:
             text = "Correct but your opponent was faster."
+        else:
+            text = "You are wrong and slow. Suck it."
     elif ans == control.game.answer:
         text = "Correct answer."
         message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid}
