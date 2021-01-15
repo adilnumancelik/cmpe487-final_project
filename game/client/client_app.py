@@ -1,6 +1,5 @@
 import utils
 import time
-import requests
 import socket
 import threading
 import json
@@ -13,93 +12,48 @@ sys.path.append('..')
 from game import Game, GameState
 
 def send_message(message_to_send):
+    message_to_send=message_to_send+"\n"
     try:
         SERVER.sendall(utils.string_to_byte(message_to_send))
     except:
         print("Message could not be sent.")
 
 def listen_to_server():
+    packets = []
     while True:
-        try:
-            # Receive message.
-            from_server = SERVER.recv(1024)
-            # Process message.
-            question_id = control.process_message(from_server)
-            
-            timestamp = time.time()
-            # If message is a question message, send the acknowledgement.
-            if question_id != "-1" and question_id != "CAL":
-                ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
-                print(f"{i}+{ack_object}")
-                ack=json.dumps(ack_object)
-                send_message(ack)
-            elif question_id == "CAL":
-                ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
-                print(f"{i}+{ack_object}")
-                ack=json.dumps(ack_object)
-                send_message(ack)  
-        except Exception as e: 
-            print(e)
-            return False   
-'''
-# Initialize game.
-control = GameController()
-for i in range(control.game.col):
-    for j in range(control.game.row):
-        control.game.board[i][j]=i*control.game.col+j
+        data = None
+        if len(packets) > 0:
+            print(packets[0])
+            data = packets[0]
+            packets.pop()
+        else:
+            try:
+                # Receive message.
+                from_server = SERVER.recv(1024)
+                print(from_server)
+                packets = from_server.split(b"\n")
+                print(packets)
+                continue 
+            except Exception as e: 
+                print(e)
+                return False   
 
-# Initialize GUI
-board = Tk()
-board.title("S0S")
+        # Process message.
+        question_id = control.process_message(data)
+        
+        timestamp = time.time()
+        # If message is a question message, send the acknowledgement.
+        if question_id != "-1" and question_id != "CAL":
+            ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
+            print(f"{i}+{ack_object}")
+            ack=json.dumps(ack_object)
+            send_message(ack)
+        elif question_id == "CAL":
+            ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
+            print(f"{i}+{ack_object}")
+            ack=json.dumps(ack_object)
+            send_message(ack)  
 
-#Function to handle moves. 
-def move(i,j):
-
-    print(f"{i}, {j}")
-    #Label(board, text=f"{i}, {j}").pack()
-
-# Function to handle answers.
-def answer(event):
-    text = "xd"
-    ans = answer_form.get()
-    if ans == control.game.answer:
-        text = "Correct answer."
-        message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid}
-        message=json.dumps(message_object)
-        send_message(message)
-    else:
-        text = "Wrong answer."
-    feedback_message.set(text)
-
-# Set label for feedback.
-feedback_message = StringVar()
-feedback_message.set("Type answer, press Enter.")
-feedback = Label(board, textvariable=feedback_message).grid(row = 2, column = 0)
-
-question=Label(board, text=control.game.question, width="25", height="4").grid(row=0, column=0)
-
-# Input form answer.
-answer_form=Entry(board, width="10")
-answer_form.grid(row=1, column=0)
-answer_form.bind('<Key-Return>', answer)
-
-# b=Button(board, text = "Click here to answer.", command = answer, width = "15", height = "4").grid(row = 2, column=0)
-
-# Create board buttons.
-buttons=[]
-for i in range(control.game.col):
-    for j in range(control.game.row):
-        action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, text = control.game.board[i][j], command = action_with_arg, width = "15", height = "4"))
-        buttons[i*control.game.col+j].grid(row = i, column=j+2)
-
-board.mainloop()
-'''
-
-
-# Find my ip.
-f = requests.request('GET', 'http://myip.dnsomatic.com')
-MY_IP = str(f.text)
 
 # Construct connection.
 PORT = 12345
@@ -162,6 +116,13 @@ def answer(event):
         text = "Wrong answer."
     feedback_message.set(text)
 
+def exx():
+    y.join()
+
+    # Closing the connection.
+    SERVER.close()
+    sys.exit()
+
 # Set label for question.
 question_var = StringVar()
 question_var.set(control.game.question)
@@ -197,6 +158,7 @@ your_score.set(f"Your score: {control.game.scores[control.player_id]}")
 opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}") 
 your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5)
 opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 6, column = 0, padx=5, pady=5)
+ex = Button(board, text="Exit", font=(None, 20), command=exx).grid(row = 7, column = 0, padx=5, pady=5)
 
 # Set board button variables.
 button_vars=[]
@@ -256,7 +218,9 @@ def update():
                 print(coor)
                 print(control.game.marked_boxes)
                 if coor in control.game.marked_boxes:
+                    print(text_color_list[i*control.game.col+j].get())
                     text_color_list[i*control.game.col+j].set('red')
+                    print(text_color_list[i*control.game.col+j].get())
 
         control.UPDATE_FLAG = False
 
