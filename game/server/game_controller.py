@@ -48,7 +48,7 @@ class GameController():
         def calibrate_timestamps(self):
             def connection_thread(self, conn):
                 message = json.dumps({"TYPE": "CALIBRATION"})
-                conn.sendall(string_to_byte(message))
+                conn.sendall(string_to_byte(message) + b"\n")
 
             for i in range(1, 11):
                 for conn in self.active_connections:
@@ -75,7 +75,7 @@ class GameController():
         print("Sending Game information to the all players")
 
         def connection_thread(self, conn):
-            conn.sendall(pickle.dumps(self.game))
+            conn.sendall(pickle.dumps(self.game) + b"\n")
 
         for conn in self.active_connections:
             if conn:
@@ -115,7 +115,7 @@ class GameController():
 
         print(f"Sending ID to the Player {id}")
 
-        conn.sendall(string_to_byte(json.dumps(message)))
+        conn.sendall(string_to_byte(json.dumps(message)) + b"\n")
 
 
     def close_connections(self):
@@ -180,10 +180,13 @@ class GameController():
         with self.lock:
             if self.game.question_uuid == uuid:
                 self.receive_question_ts[id] = timestamp
-                if self.receive_question_ts[1 - id]  and self.get_timestamp_diff() <= self.MAX_RECEIVE_TIME_DIFFERENCE:
-                    print("Both player has received the question " + uuid)
-                    self.both_players_received = True
-                    return
+                if self.receive_question_ts[1 - id]: 
+                    if self.get_timestamp_diff() <= self.MAX_RECEIVE_TIME_DIFFERENCE:
+                        print("Both player has received the question " + uuid)
+                        self.both_players_received = True
+                        return
+                    else:
+                        return
             else:
                 return 
 

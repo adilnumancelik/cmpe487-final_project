@@ -30,11 +30,16 @@ def accept_connections():
       
 
 def threaded_client(conn, controller, id):
+  packets = []
   while True:
     data = None
+    if len(packets) > 0:
+      data = packets[0]
+      packets.pop()
     try:
-      data = conn.recv(1024)
-      assert data
+      resp = conn.recv(1024)
+      packets = resp.split()
+      continue 
     except:
       print(f"Player with {id} has been disconnected.")
       controller.remove_player(id)
