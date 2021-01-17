@@ -1,6 +1,7 @@
 # cmpe487-final_project
-
-Yasin Kaya - Adil Numan Çelik
+# Group members
+- Yasin Kaya 
+- Adil Numan Çelik
 
 # Description:
 S0S! A new game based on classical SOS game.
