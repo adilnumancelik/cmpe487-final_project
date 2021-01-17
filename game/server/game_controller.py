@@ -16,7 +16,7 @@ class GameController():
 
     def __init__(self):
         self.active_connections = [None, None] 
-        self.game = Game(3, 3)
+        self.game = Game(5, 5)
         self.lock = threading.Lock()
         self.receive_question_ts = [None, None]
         self.both_players_received = False
@@ -46,6 +46,7 @@ class GameController():
             self.ts_difference = 0
             self.received_acks_cnt = [0, 0]
             self.ping_difference = 0
+        self.notify_players()
 
     def restart_game(self):
         with self.lock:
@@ -179,7 +180,6 @@ class GameController():
     
     def give_turn(self, id, question_uuid):
         with self.lock:
-            print(self.game.state, self.game.question_uuid)
             if self.game.state != GameState.QUESTION or self.game.question_uuid != question_uuid:
                 return 
             self.game.state = GameState.MOVE
@@ -195,11 +195,14 @@ class GameController():
 
     def check_question_ack(self, id, client_rec, client_send, uuid):
         
+
         self.ts_info[id][uuid]["server_rec"] = time.time()
         self.ts_info[id][uuid]["client_rec"] = client_rec
         self.ts_info[id][uuid]["client_send"] = client_send
 
         with self.lock:
+            if self.game.state != GameState.QUESTION:
+                return
             if self.game.question_uuid == uuid:
                 self.receive_question_ts[id] = client_rec
                 if self.receive_question_ts[1 - id]: 
