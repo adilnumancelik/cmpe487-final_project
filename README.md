@@ -3,15 +3,15 @@
 - Yasin Kaya 
 - Adil Numan Çelik
 
-# Description:
+# Description
 S0S! A new game based on classical SOS game.
 You need to solve easy mathematical problems before your opponent to get right to make your move.
 
-# Tested on:
+# Tested on
 Winows 10 Operating System
 
-# How to run:
+# How to run
 
-# How to play:
+# How to play
 
-# Network challenges:
+# Network challenges
