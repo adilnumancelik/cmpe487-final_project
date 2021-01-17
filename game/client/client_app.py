@@ -130,6 +130,7 @@ def exit_func():
     sys.exit()
     y.join()
 
+restart = 0
 # Function to handle restart call.
 def restart_func():
     restart.destroy()
@@ -161,7 +162,7 @@ o.grid(row=3, column=0, padx=5, pady=5)
 # Set score labels.
 your_score=StringVar()
 opponents_score=StringVar()
-your_score.set(f"{control.game.players_names[control.player_id]} score: {control.game.scores[control.player_id]}")
+your_score.set(f"{control.game.players_names[control.player_id]}'s score: {control.game.scores[control.player_id]}")
 opponents_score.set(f"{control.game.players_names[1-control.player_id]}'s score: {control.game.scores[1-control.player_id]}") 
 your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 4, column = 0, padx=5, pady=5)
 opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5)
@@ -203,7 +204,7 @@ def update():
             question_var.set("")
             feedback_message.set("Wait your opponent to connect.")
 
-        your_score.set(f"{control.game.players_names[control.player_id]} score: {control.game.scores[control.player_id]}")
+        your_score.set(f"{control.game.players_names[control.player_id]}'s score: {control.game.scores[control.player_id]}")
         opponents_score.set(f"{control.game.players_names[1-control.player_id]}'s score: {control.game.scores[1-control.player_id]}")             
         
         # Delete content of answer form.
