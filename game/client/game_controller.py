@@ -9,9 +9,10 @@ from game import Game, GameState
 class GameController():
 
     def __init__(self):
-        self.game = Game(7, 7)
+        self.game = Game(3, 3)
         self.player_id = 0
         self.UPDATE_FLAG = False
+        self.ticked = 0
 
     def process_message(self, inc_message):
         try:
@@ -20,12 +21,18 @@ class GameController():
                 self.player_id = int(inc_message_o["PAYLOAD"])
                 return "-1"
             elif inc_message_o["TYPE"] == "CALIBRATION":
-                return "CAL"
+                return "CAL"+inc_message_o["PAYLOAD"]
         except:
             self.game = pickle.loads(inc_message)
-            print(f"qid {self.game.question_uuid}")
             self.UPDATE_FLAG = True
             if self.game.state == GameState.QUESTION:
                 return self.game.question_uuid
             else:
                 return "-1"
+
+    def isFinished(self):
+        for i in range(self.game.col):
+            for j in range(self.game.row):
+                if self.game.board[i][j] == "":
+                    return False
+        return True

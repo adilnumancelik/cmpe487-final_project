@@ -12,7 +12,7 @@ sys.path.append('..')
 from game import Game, GameState
 
 def send_message(message_to_send):
-    message_to_send=message_to_send+"\n"
+    message_to_send=message_to_send+"xaxaxayarmaW"
     try:
         SERVER.sendall(utils.string_to_byte(message_to_send))
     except:
@@ -21,18 +21,20 @@ def send_message(message_to_send):
 def listen_to_server():
     packets = []
     while True:
+        timestamp_r
+        timestamp_s
         data = None
         if len(packets) > 0:
-            print(packets[0])
-            data = packets[0]
+            # print(packets[-1])
+            data = packets[-1]
             packets.pop()
         else:
             try:
                 # Receive message.
-                from_server = SERVER.recv(1024)
-                print(from_server)
-                packets = from_server.split(b"\n")
-                print(packets)
+                from_server = SERVER.recv(1024).rstrip(b"xaxaxayarmaW")
+                timestamp_r = time.time()
+                # print(from_server)
+                packets = from_server.split(b"xaxaxayarmaW")
                 continue 
             except Exception as e: 
                 print(e)
@@ -45,15 +47,14 @@ def listen_to_server():
         # If message is a question message, send the acknowledgement.
         if question_id != "-1" and question_id != "CAL":
             ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
-            print(f"{i}+{ack_object}")
             ack=json.dumps(ack_object)
             send_message(ack)
-        elif question_id == "CAL":
-            ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
-            print(f"{i}+{ack_object}")
+        elif question_id.startswith("CAL"):
+            timestamp_r=time.time()
+            ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP_R": timestamp_r, "TIMESTAMP_S" = timestamp_s, "ID": question_id[3:]}
             ack=json.dumps(ack_object)
             send_message(ack)  
-
+        print(timestamp_r, timestamp_s)
 
 # Construct connection.
 PORT = 12345
@@ -107,6 +108,8 @@ def answer(event):
     if control.game.state != GameState.QUESTION:
         if ans == control.game.answer:
             text = "Correct but your opponent was faster."
+        else:
+            text = "You are wrong and slow. Suck it."
     elif ans == control.game.answer:
         text = "Correct answer."
         message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid}
@@ -117,10 +120,10 @@ def answer(event):
     feedback_message.set(text)
 
 def exx():
-    y.join()
-
-    # Closing the connection.
+    board.destroy()
     SERVER.close()
+    y.join()
+    # Closing the connection.
     sys.exit()
 
 # Set label for question.
@@ -167,19 +170,13 @@ for i in range(control.game.col):
         button_vars.append(StringVar())
         button_vars[i*control.game.col+j].set(control.game.board[i][j])
 
-# Create text color list.
-text_color_list = []
-
 # Create board buttons list.
 buttons=[]
 for i in range(control.game.col):
     for j in range(control.game.row):
-        # Create text color variables and initially set to black.
-        text_color_list.append(StringVar())
-        text_color_list[i*control.game.col+j].set('black')
         # Create buttons.
         action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), fg=text_color_list[-1].get(), disabledforeground=text_color_list[-1].get(), command = action_with_arg, width = "5", height = "2"))
+        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
         buttons[i*control.game.col+j].grid(row = i, column=j+2, padx=5, pady=5)
         buttons[i*control.game.col+j]["state"] = "disabled"
         
@@ -207,6 +204,7 @@ def update():
         answer_form.delete(0,END)
         
         # Update board button and text color variables.
+        
         for i in range(control.game.col):
             for j in range(control.game.row):
                 coor = i*control.game.col+j 
@@ -215,12 +213,16 @@ def update():
                     buttons[i*control.game.col+j]["state"] = "disabled"
                 else:
                     buttons[i*control.game.col+j]["state"] = "normal"
-                print(coor)
-                print(control.game.marked_boxes)
                 if coor in control.game.marked_boxes:
-                    print(text_color_list[i*control.game.col+j].get())
-                    text_color_list[i*control.game.col+j].set('red')
-                    print(text_color_list[i*control.game.col+j].get())
+                    buttons[i*control.game.col+j].configure(disabledforeground = "red")
+        
+        if control.isFinished():
+            if control.game.scores[control.player_id] > control.game.scores[1-control.player_id]:
+                feedback_message.set("Game over. You won.")
+            elif control.game.scores[control.player_id] < control.game.scores[1-control.player_id]:
+                feedback_message.set(f"Game over. You lost.")
+            else:
+                feedback_message.set(f"Game over. Tied.")
 
         control.UPDATE_FLAG = False
 
@@ -228,9 +230,11 @@ def update():
 update()
 board.mainloop()
 
+# Closing the connection.
+SERVER.close()
+
 # Join the listening thread.
 y.join()
 
-# Closing the connection.
-SERVER.close()
+
 sys.exit()
