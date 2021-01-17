@@ -181,6 +181,8 @@ class GameController():
         self.notify_players()
     
     def give_turn(self, id, question_uuid, duration):
+
+        print(f"Player {id} duration: {duration} seconds")
         with self.lock:
             if self.game.state != GameState.QUESTION or self.game.question_uuid != question_uuid:
                 return 

@@ -55,3 +55,4 @@ This allows us to understand the sources of time difference between two answers.
 To create a fair game we
 - Make the player with faster connection wait as much as the ping difference between players.
 - Calculate the time difference that two players receive the message using the average ping difference and timestamp difference. If this difference is more than 10 ms we update the question until we make sure that this difference is less than 10 ms.
+- We calculate the amount of time players needed to answer a question. It is equal to difference between the moments that client sends the answer and receives the question. Since, all these times are calculated in clients, they will not be effected by timestamp differences and network latency. Clients send this calculated amount of time to server and server compares them. The player with the smallest amount of time gets the turn.
