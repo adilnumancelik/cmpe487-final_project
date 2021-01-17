@@ -77,13 +77,25 @@ control = GameController()
 y=threading.Thread(target=listen_to_server, daemon=True)
 y.start()
 
-# Send player name to server.
-PLAYER_NAME = input("Enter your name (should be shorter than 10 characters): ")
-if len(PLAYER_NAME) > 10:
+def name_func(event):
+    PLAYER_NAME = answer_form.get()
     PLAYER_NAME = PLAYER_NAME[:10]
-message_object= {"TYPE": "NAME","PAYLOAD": PLAYER_NAME}
-message=json.dumps(message_object)
-send_message(message)
+    message_object= {"TYPE": "NAME","PAYLOAD": PLAYER_NAME}
+    message=json.dumps(message_object)
+    send_message(message)
+    name_frame.destroy()
+
+# Initialize GUI for player name.
+name_frame = Tk()
+name_frame.title("S0S")
+
+mes = Label(name_frame, text="Enter your name (should be shorter than 10 characters): ", font=(None, 15)). grid(row = 0, column = 0, padx=5, pady=5)
+
+answer_form=Entry(name_frame, width="30")
+answer_form.grid(row=1, column=0, padx=5,pady=20,ipady=10)
+answer_form.bind('<Key-Return>', name_func)
+
+name_frame.mainloop()
 
 # Initialize GUI
 board = Tk()
@@ -128,7 +140,6 @@ def exit_func():
     # Closing the connection.
     SERVER.close()
     sys.exit()
-    y.join()
 
 # Function to handle restart call.
 def restart_func():
@@ -150,7 +161,7 @@ answer_form.bind('<Key-Return>', answer)
 # Set label for feedback.
 feedback_message = StringVar()
 feedback_message.set("Type answer, press Enter.")
-feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 0, column = 2, padx=5, pady=5, columnspan=5)
+feedback = Label(board, textvariable=feedback_message, font=(None, 15)). grid(row = 0, column = 2, padx=5, pady=5, columnspan=5)
 
 # Radio buttons for choosing S or O.
 s = Radiobutton(board, text='S', font=(None, 20), variable=choice, value='S')
@@ -169,7 +180,7 @@ opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row 
 # Set exit button.
 ex = Button(board, text="EXIT", font=(None, 20), command=exit_func).grid(row = 6, column = 0, padx=5, pady=5)
 # Set restart button.
-restart=Button(board, text="RESTART", font=(None, 20), command=restart_func, width="20", height="2")
+restart=Button(board, text="RESTART", font=(None, 20), command=restart_func)
 restart.grid(row=6, column=1, padx=5, pady=5)
 restart["state"] = "disabled"
 
@@ -186,7 +197,7 @@ for i in range(control.game.col):
     for j in range(control.game.row):
         # Create buttons.
         action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
+        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "7", height = "3"))
         buttons[i*control.game.col+j].grid(row = i+1, column=j+3, padx=5, pady=5)
         buttons[i*control.game.col+j]["state"] = "disabled"
         
@@ -225,7 +236,8 @@ def update():
                     buttons[i*control.game.col+j]["state"] = "normal"
                 if coor in control.game.marked_boxes:
                     buttons[i*control.game.col+j].configure(disabledforeground = "red")
-        
+                else:
+                    buttons[i*control.game.col+j].configure(disabledforeground = "black")
         if control.isFinished():
             if control.game.scores[control.player_id] > control.game.scores[1-control.player_id]:
                 feedback_message.set("Game over. You won.")
@@ -235,7 +247,8 @@ def update():
                 feedback_message.set(f"Game over. Tied.")
 
             restart["state"] = "normal"
-            
+        else:
+            restart["state"] = "disabled" 
 
         control.UPDATE_FLAG = False
 
@@ -246,8 +259,5 @@ board.mainloop()
 # Closing the connection.
 SERVER.close()
 
-# Join the listening thread.
-y.join()
-
-
+# Exit the program.
 sys.exit()
