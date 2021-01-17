@@ -203,8 +203,8 @@ def update():
             question_var.set("")
             feedback_message.set("Wait your opponent to connect.")
 
-        your_score.set(f"Your score: {control.game.scores[control.player_id]}")
-        opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}")             
+        your_score.set(f"{control.game.players_names[control.player_id]} score: {control.game.scores[control.player_id]}")
+        opponents_score.set(f"{control.game.players_names[1-control.player_id]}'s score: {control.game.scores[1-control.player_id]}")             
         
         # Delete content of answer form.
         answer_form.delete(0,END)
@@ -230,8 +230,6 @@ def update():
             else:
                 feedback_message.set(f"Game over. Tied.")
 
-            question_var = StringVar()
-            question_var.set(control.game.question)
             restart=Button(board, text="RESTART", font=(None, 20), command=restart_func, width="20", height="2").grid(row=7, column=0, padx=5, pady=5, columnspan=4)
 
         control.UPDATE_FLAG = False
