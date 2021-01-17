@@ -10,9 +10,16 @@ You need to solve easy mathematical problems before your opponent to get right t
 # Tested on
 Windows 10 Operating System
 
-We highly recommend you to run it on Windows 10. Ubuntu or another operating system probably won't run the program.
+We highly recommend you to run it on Windows 10. Ubuntu or another operating system won't run the program.
 
 However, if you want to run it on Ubuntu you will need to install Tkinter following this [tutorial](https://www.techinfected.net/2015/09/how-to-install-and-use-tkinter-in-ubuntu-debian-linux-mint.html)
+
+If you face with this error:
+```bash
+_tkinter.TclError: no display name and no +DISPLAY environment variable
+```
+
+Try this [solution](https://stackoverflow.com/questions/48254530/tkinter-in-ubuntu-inside-windows-10-error-no-display-name-and-no-display-env).
 
 # How to Run
 - To run the client open ../game/client folder in your Windows Terminal (cmd) and type:
