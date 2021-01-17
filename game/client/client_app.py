@@ -11,6 +11,7 @@ sys.path.append('..')
 
 from game import Game, GameState
 
+# Function that sends messages to the server.
 def send_message(message_to_send):
     message_to_send=message_to_send+"xaxaxayarmaW"
     try:
@@ -18,6 +19,7 @@ def send_message(message_to_send):
     except:
         print("Message could not be sent.")
 
+# Function that listens to the server.
 def listen_to_server():
     packets = []
     timestamp_r = 0
@@ -59,7 +61,6 @@ def listen_to_server():
 # Construct connection.
 PORT = 12345
 SERVER_IP = "18.198.166.19"
-# SERVER_IP = "3.230.114.17"
 SERVER = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect to the server.
@@ -77,7 +78,9 @@ y=threading.Thread(target=listen_to_server, daemon=True)
 y.start()
 
 # Send player name to server.
-PLAYER_NAME = input("Enter your name: ")
+PLAYER_NAME = input("Enter your name (should be shorter than 10 characters): ")
+if len(PLAYER_NAME) > 10:
+    PLAYER_NAME = PLAYER_NAME[:10]
 message_object= {"TYPE": "NAME","PAYLOAD": PLAYER_NAME}
 message=json.dumps(message_object)
 send_message(message)
@@ -109,7 +112,7 @@ def answer(event):
         if ans == control.game.answer:
             text = "Correct but your opponent was faster."
         else:
-            text = "You are wrong and slow. Suck it."
+            text = "Wrong answer and opponent's was correct."
     elif ans == control.game.answer:
         text = "Correct answer."
         message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid}
@@ -119,13 +122,21 @@ def answer(event):
         text = "Wrong answer."
     feedback_message.set(text)
 
-def exx():
+# Function to handle exit call.
+def exit_func():
     board.destroy()
-    SERVER.close()
-    y.join()
     # Closing the connection.
+    SERVER.close()
     sys.exit()
+    y.join()
 
+# Function to handle restart call.
+def restart_func():
+    restart.destroy()
+    message_object= {"TYPE": "RESTART"}
+    message=json.dumps(message_object)
+    send_message(message)
+    
 # Set label for question.
 question_var = StringVar()
 question_var.set(control.game.question)
@@ -139,29 +150,24 @@ answer_form.bind('<Key-Return>', answer)
 # Set label for feedback.
 feedback_message = StringVar()
 feedback_message.set("Type answer, press Enter.")
-feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 2, column = 0, padx=5, pady=5)
+feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 0, column = 2, padx=5, pady=5, columnspan=3)
 
 # Radio buttons for choosing S or O.
 s = Radiobutton(board, text='S', font=(None, 20), variable=choice, value='S')
 o = Radiobutton(board, text='O', font=(None, 20), variable=choice, value='O')
-s.grid(row=3, column=0, padx=5, pady=5)
-o.grid(row=4, column=0, padx=5, pady=5)
+s.grid(row=2, column=0, padx=5, pady=5)
+o.grid(row=3, column=0, padx=5, pady=5)
 
-'''
-# Set button for picking S or O.
-a=Button(board, text="Pick S", command = S, width="25", height="4")
-a.grid(row=3, column=0)
-b=Button(board, text="Pick O", command = O, width="25", height="4")
-b.grid(row=4, column=0)
-'''
 # Set score labels.
 your_score=StringVar()
 opponents_score=StringVar()
-your_score.set(f"Your score: {control.game.scores[control.player_id]}")
-opponents_score.set(f"Opponent's score: {control.game.scores[1-control.player_id]}") 
-your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5)
-opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 6, column = 0, padx=5, pady=5)
-ex = Button(board, text="Exit", font=(None, 20), command=exx).grid(row = 7, column = 0, padx=5, pady=5)
+your_score.set(f"{control.game.players_names[control.player_id]} score: {control.game.scores[control.player_id]}")
+opponents_score.set(f"{control.game.players_names[1-control.player_id]}'s score: {control.game.scores[1-control.player_id]}") 
+your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 4, column = 0, padx=5, pady=5)
+opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5)
+
+# Set exit button.
+ex = Button(board, text="Exit", font=(None, 20), command=exit_func).grid(row = 6, column = 0, padx=5, pady=5)
 
 # Set board button variables.
 button_vars=[]
@@ -177,7 +183,7 @@ for i in range(control.game.col):
         # Create buttons.
         action_with_arg = partial(move, i, j)
         buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
-        buttons[i*control.game.col+j].grid(row = i, column=j+2, padx=5, pady=5)
+        buttons[i*control.game.col+j].grid(row = i+1, column=j+2, padx=5, pady=5)
         buttons[i*control.game.col+j]["state"] = "disabled"
         
 
@@ -223,6 +229,10 @@ def update():
                 feedback_message.set(f"Game over. You lost.")
             else:
                 feedback_message.set(f"Game over. Tied.")
+
+            question_var = StringVar()
+            question_var.set(control.game.question)
+            restart=Button(board, text="RESTART", font=(None, 20), command=restart_func, width="20", height="2").grid(row=7, column=0, padx=5, pady=5, columnspan=4)
 
         control.UPDATE_FLAG = False
 
