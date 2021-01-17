@@ -25,7 +25,10 @@ class Game():
         self.scores = [0, 0]
         self.marked_boxes = set([])
         self.wait_times = [0, 0]
-        
+
     def reset_board(self):
         self.board = [["" for x in range(self.col)] for y in range(self.row)]
+        self.scores = [0, 0]
+        self.marked_boxes = set([])
+        self.complete_lines = []
 

@@ -61,7 +61,9 @@ def threaded_client(conn, controller, id):
     elif message["TYPE"] == "ANSWER":
       controller.give_turn(id, message["PAYLOAD"])
     elif message["TYPE"] == "ACK":
-      controller.check_question_ack(id, message["TIMESTAMP"], message["QUESTION"])
+      controller.check_question_ack(id, message["TIMESTAMP_R"], message["TIMESTAMP_S"], message["QUESTION"])
     elif message["TYPE"] == "CALIBRATION":
       controller.add_calibration_ack(id, message["TIMESTAMP_R"], message["TIMESTAMP_S"], int(message["ID"]))
+    elif message["TYPE"] == "RESTART":
+      controller.restart_game()
 accept_connections()
