@@ -59,7 +59,7 @@ def threaded_client(conn, controller, id):
     elif message["TYPE"] == "MOVE":
       controller.move(id, message["PAYLOAD"])
     elif message["TYPE"] == "ANSWER":
-      controller.give_turn(id, message["PAYLOAD"])
+      controller.give_turn(id, message["PAYLOAD"], message["DURATION"])
     elif message["TYPE"] == "ACK":
       controller.check_question_ack(id, message["TIMESTAMP_R"], message["TIMESTAMP_S"], message["QUESTION"])
     elif message["TYPE"] == "CALIBRATION":
