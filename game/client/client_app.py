@@ -130,10 +130,9 @@ def exit_func():
     sys.exit()
     y.join()
 
-restart = 0
 # Function to handle restart call.
 def restart_func():
-    restart.destroy()
+    restart["state"] = "disabled"
     message_object= {"TYPE": "RESTART"}
     message=json.dumps(message_object)
     send_message(message)
@@ -141,34 +140,37 @@ def restart_func():
 # Set label for question.
 question_var = StringVar()
 question_var.set(control.game.question)
-question=Label(board, textvariable=question_var, font=(None, 20), width="20", height="2").grid(row=0, column=0, padx=5, pady=5)
+question=Label(board, textvariable=question_var, font=(None, 20), width="20", height="2").grid(row=0, column=0, padx=5, pady=5, columnspan=2)
 
 # Set input for answer.
 answer_form=Entry(board, width="30")
-answer_form.grid(row=1, column=0)
+answer_form.grid(row=1, column=0, columnspan=2)
 answer_form.bind('<Key-Return>', answer)
 
 # Set label for feedback.
 feedback_message = StringVar()
 feedback_message.set("Type answer, press Enter.")
-feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 0, column = 2, padx=5, pady=5, columnspan=3)
+feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 0, column = 2, padx=5, pady=5, columnspan=5)
 
 # Radio buttons for choosing S or O.
 s = Radiobutton(board, text='S', font=(None, 20), variable=choice, value='S')
 o = Radiobutton(board, text='O', font=(None, 20), variable=choice, value='O')
-s.grid(row=2, column=0, padx=5, pady=5)
-o.grid(row=3, column=0, padx=5, pady=5)
+s.grid(row=2, column=0, padx=5, pady=5, columnspan=2)
+o.grid(row=3, column=0, padx=5, pady=5, columnspan=2)
 
 # Set score labels.
 your_score=StringVar()
 opponents_score=StringVar()
 your_score.set(f"{control.game.players_names[control.player_id]}'s score: {control.game.scores[control.player_id]}")
 opponents_score.set(f"{control.game.players_names[1-control.player_id]}'s score: {control.game.scores[1-control.player_id]}") 
-your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 4, column = 0, padx=5, pady=5)
-opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5)
+your = Label(board, textvariable=your_score, font=(None, 20)).grid(row = 4, column = 0, padx=5, pady=5, columnspan=2)
+opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row = 5, column = 0, padx=5, pady=5, columnspan=2)
 
 # Set exit button.
-ex = Button(board, text="Exit", font=(None, 20), command=exit_func).grid(row = 6, column = 0, padx=5, pady=5)
+ex = Button(board, text="EXIT", font=(None, 20), command=exit_func).grid(row = 6, column = 0, padx=5, pady=5)
+# Set restart button.
+restart=Button(board, text="RESTART", font=(None, 20), command=restart_func, width="20", height="2").grid(row=6, column=1, padx=5, pady=5)
+restart["state"] = "disabled"
 
 # Set board button variables.
 button_vars=[]
@@ -184,7 +186,7 @@ for i in range(control.game.col):
         # Create buttons.
         action_with_arg = partial(move, i, j)
         buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
-        buttons[i*control.game.col+j].grid(row = i+1, column=j+2, padx=5, pady=5)
+        buttons[i*control.game.col+j].grid(row = i+1, column=j+3, padx=5, pady=5)
         buttons[i*control.game.col+j]["state"] = "disabled"
         
 
@@ -231,7 +233,8 @@ def update():
             else:
                 feedback_message.set(f"Game over. Tied.")
 
-            restart=Button(board, text="RESTART", font=(None, 20), command=restart_func, width="20", height="2").grid(row=7, column=0, padx=5, pady=5, columnspan=4)
+            restart["state"] = "normal"
+            
 
         control.UPDATE_FLAG = False
 
