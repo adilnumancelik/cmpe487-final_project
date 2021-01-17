@@ -20,9 +20,9 @@ def send_message(message_to_send):
 
 def listen_to_server():
     packets = []
+    timestamp_r = 0
+    timestamp_s = 0
     while True:
-        timestamp_r = 0
-        timestamp_s = 0
         data = None
         if len(packets) > 0:
             # print(packets[-1])
@@ -50,7 +50,7 @@ def listen_to_server():
             ack=json.dumps(ack_object)
             send_message(ack)
         elif question_id.startswith("CAL"):
-            timestamp_r=time.time()
+            timestamp_s=time.time()
             ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP_R": timestamp_r, "TIMESTAMP_S": timestamp_s, "ID": question_id[3:]}
             ack=json.dumps(ack_object)
             send_message(ack)  
