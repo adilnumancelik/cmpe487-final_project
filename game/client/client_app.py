@@ -43,15 +43,15 @@ def listen_to_server():
         # Process message.
         question_id = control.process_message(data)
         
-        timestamp = time.time()
+        timestamp_s=time.time()
         # If message is a question message, send the acknowledgement.
         if question_id != "-1" and not question_id.startswith("CAL"):
-            ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
+            ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP_R": timestamp_r, "TIMESTAMP_S": timestamp_s}
             ack=json.dumps(ack_object)
             send_message(ack)
         elif question_id.startswith("CAL"):
             timestamp_s=time.time()
-            ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP_R": timestamp_r, "TIMESTAMP_S": timestamp_s, "ID": question_id[3:]}
+            ack_object= {"TYPE": "CALIBRATION", "ID": question_id[3:], "TIMESTAMP_R": timestamp_r, "TIMESTAMP_S": timestamp_s}
             ack=json.dumps(ack_object)
             send_message(ack)  
         print(timestamp_r, timestamp_s)

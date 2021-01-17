@@ -27,6 +27,7 @@ class GameController():
             # Load the game.
             self.game = pickle.loads(inc_message)
             # Sleep so that ping difference between clients does not effect gameplay.
+            print(self.game.wait_times)
             time.sleep(self.game.wait_times[self.player_id])
             # Update flag is true, UI can be updated.
             self.UPDATE_FLAG = True
