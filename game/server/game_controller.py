@@ -79,8 +79,6 @@ class GameController():
 
         if ready:
             threading.Thread(target=calibrate_timestamps, args=(self,), daemon=True).start()
-            print("Hey")
-
 
 
 
