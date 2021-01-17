@@ -35,6 +35,7 @@ def listen_to_server():
                 # Receive message.
                 from_server = SERVER.recv(1024).rstrip(b"xaxaxayarmaW")
                 timestamp_r = time.time()
+                control.time_received = timestamp_r
                 # print(from_server)
                 packets = from_server.split(b"xaxaxayarmaW")
                 continue 
@@ -118,6 +119,7 @@ def move(i,j):
 
 # Function to handle answers.
 def answer(event):
+    timestamp_a=time.time()
     text = "xd"
     ans = answer_form.get()
     if control.game.state != GameState.QUESTION:
@@ -127,7 +129,7 @@ def answer(event):
             text = "Wrong answer and opponent's was correct."
     elif ans == control.game.answer:
         text = "Correct answer."
-        message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid}
+        message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid, "DURATION": timestamp_a-control.time_received}
         message=json.dumps(message_object)
         send_message(message)
     else:

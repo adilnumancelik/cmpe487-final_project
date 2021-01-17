@@ -14,6 +14,7 @@ class GameController():
         self.player_id = 0
         self.UPDATE_FLAG = False
         self.ticked = 0
+        self.time_received = 0
 
     def process_message(self, inc_message):
         try:
