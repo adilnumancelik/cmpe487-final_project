@@ -10,7 +10,7 @@ from game import Game, GameState
 class GameController():
 
     def __init__(self):
-        self.game = Game(5, 5)
+        self.game = Game(4, 4)
         self.player_id = 0
         self.UPDATE_FLAG = False
         self.ticked = 0
