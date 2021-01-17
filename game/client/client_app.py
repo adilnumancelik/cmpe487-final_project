@@ -169,7 +169,8 @@ opponent = Label(board, textvariable=opponents_score, font=(None, 20)).grid(row 
 # Set exit button.
 ex = Button(board, text="EXIT", font=(None, 20), command=exit_func).grid(row = 6, column = 0, padx=5, pady=5)
 # Set restart button.
-restart=Button(board, text="RESTART", font=(None, 20), command=restart_func, width="20", height="2").grid(row=6, column=1, padx=5, pady=5)
+restart=Button(board, text="RESTART", font=(None, 20), command=restart_func, width="20", height="2")
+restart.grid(row=6, column=1, padx=5, pady=5)
 restart["state"] = "disabled"
 
 # Set board button variables.
