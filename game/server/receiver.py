@@ -4,9 +4,11 @@ import _thread
 import utils
 import json
 import sys
+import time
 from game_controller import GameController 
 
 PORT = 12345
+SPECIAL_KEYWORD = b"xaxaxayarmaW"
 
 def accept_connections():
   controller = GameController()
@@ -34,25 +36,23 @@ def threaded_client(conn, controller, id):
   while True:
     data = None
     if len(packets) > 0:
-      data = packets[0]
+      data = packets[-1]
       packets.pop()
     else:
       try:
-        resp = conn.recv(1024)
-        packets = resp.split(b"\n")
+        resp = conn.recv(1024).rstrip(SPECIAL_KEYWORD)
+        packets = resp.split(SPECIAL_KEYWORD)
         continue 
       except:
         print(f"Player with {id} has been disconnected.")
         controller.remove_player(id)
         return
     message = json.loads(utils.byte_to_string(data))
-    print(f"Receive message from Player {id}: {message}")
+    print(f"Receive message from Player {id}: {message} / Time: {time.time()}")
 
     if "TYPE" not in message:
       print("Unkown type of message :(")
       continue
-
-    print(message)
 
     if message["TYPE"] == "NAME":
       controller.enter_name(id, message["PAYLOAD"])
@@ -63,5 +63,5 @@ def threaded_client(conn, controller, id):
     elif message["TYPE"] == "ACK":
       controller.check_question_ack(id, message["TIMESTAMP"], message["QUESTION"])
     elif message["TYPE"] == "CALIBRATION":
-      controller.add_calibration_ack(id, message["TIMESTAMP"])
+      controller.add_calibration_ack(id, message["TIMESTAMP_R"], message["TIMESTAMP_S"], message["ID"])
 accept_connections()
