@@ -21,6 +21,8 @@ def send_message(message_to_send):
 def listen_to_server():
     packets = []
     while True:
+        timestamp_r
+        timestamp_s
         data = None
         if len(packets) > 0:
             # print(packets[-1])
@@ -30,9 +32,9 @@ def listen_to_server():
             try:
                 # Receive message.
                 from_server = SERVER.recv(1024).rstrip(b"xaxaxayarmaW")
+                timestamp_r = time.time()
                 # print(from_server)
                 packets = from_server.split(b"xaxaxayarmaW")
-                print(packets)
                 continue 
             except Exception as e: 
                 print(e)
@@ -45,15 +47,14 @@ def listen_to_server():
         # If message is a question message, send the acknowledgement.
         if question_id != "-1" and question_id != "CAL":
             ack_object= {"TYPE": "ACK", "QUESTION": question_id, "TIMESTAMP": timestamp}
-            print(f"{i}+{ack_object}")
             ack=json.dumps(ack_object)
             send_message(ack)
-        elif question_id == "CAL":
-            ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP": timestamp}
-            print(f"{i}+{ack_object}")
+        elif question_id.startswith("CAL"):
+            timestamp_r=time.time()
+            ack_object= {"TYPE": "CALIBRATION", "TIMESTAMP_R": timestamp_r, "TIMESTAMP_S" = timestamp_s, "ID": question_id[3:]}
             ack=json.dumps(ack_object)
             send_message(ack)  
-
+        print(timestamp_r, timestamp_s)
 
 # Construct connection.
 PORT = 12345
@@ -120,9 +121,9 @@ def answer(event):
 
 def exx():
     board.destroy()
+    SERVER.close()
     y.join()
     # Closing the connection.
-    SERVER.close()
     sys.exit()
 
 # Set label for question.
@@ -229,9 +230,11 @@ def update():
 update()
 board.mainloop()
 
+# Closing the connection.
+SERVER.close()
+
 # Join the listening thread.
 y.join()
 
-# Closing the connection.
-SERVER.close()
+
 sys.exit()
