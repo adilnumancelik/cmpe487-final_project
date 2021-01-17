@@ -31,4 +31,5 @@ class Game():
         self.scores = [0, 0]
         self.marked_boxes = set([])
         self.complete_lines = []
+        self.state = GameState.WAITING
 

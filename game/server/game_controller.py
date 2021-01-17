@@ -189,8 +189,6 @@ class GameController():
     
     # Returns the normalized timestamp difference between acknowledgment of two players in seconds. 
     def get_timestamp_diff(self):
-        print("----> ", (self.receive_question_ts[0] - self.receive_question_ts[1] - self.ts_difference))
-        print("----> ", (self.receive_question_ts[0] - self.receive_question_ts[1] - self.ts_difference - self.ping_difference))
         return abs(self.receive_question_ts[0] - self.receive_question_ts[1] - self.ts_difference - self.ping_difference)
 
     def check_question_ack(self, id, client_rec, client_send, uuid):
