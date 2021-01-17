@@ -16,7 +16,7 @@ class GameController():
 
     def __init__(self):
         self.active_connections = [None, None] 
-        self.game = Game(5, 5)
+        self.game = Game(4, 4)
         self.lock = threading.Lock()
         self.receive_question_ts = [None, None]
         self.both_players_received = False
