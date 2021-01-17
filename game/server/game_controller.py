@@ -24,6 +24,7 @@ class GameController():
         self.calibrations = [[{} for _ in range(10)], [{} for _ in range(10)]]
         self.ts_difference = 0 # Average difference between timestamps of player 0 and 1.
         self.received_acks_cnt = [0, 0]
+        self.ping_difference = 0
 
     def add_connection(self, conn):
         id = 1
@@ -43,6 +44,7 @@ class GameController():
             self.calibrations = [[{} for _ in range(10)], [{} for _ in range(10)]]
             self.ts_difference = 0
             self.received_acks_cnt = [0, 0]
+            self.ping_difference = 0
 
 
     def enter_name(self, id, name):
@@ -54,10 +56,10 @@ class GameController():
                 self.calibrations[id][i]["server_send"] = time.time()
                 conn.sendall(string_to_byte(message) + self.SPECIAL_KEYWORD)
 
-            for i in range(1, 11):
-                for conn in self.active_connections:
+            for i in range(10):
+                for idx, conn in enumerate(self.active_connections):
                     if conn:
-                        threading.Thread(target=connection_thread, args=(self, conn, id, i), daemon=True).start()
+                        threading.Thread(target=connection_thread, args=(self, conn, idx, i), daemon=True).start()
                 time.sleep(0.2)
 
         with self.lock:
@@ -178,8 +180,8 @@ class GameController():
     
     # Returns the normalized timestamp difference between acknowledgment of two players in seconds. 
     def get_timestamp_diff(self):
-        print("----> ", self.receive_question_ts, self.ts_difference)
-        return abs(self.receive_question_ts[0] - self.receive_question_ts[1] - self.ts_difference)
+        print("----> ", abs(self.receive_question_ts[0] - self.receive_question_ts[1] - self.ts_difference - self.ping_difference))
+        return abs(self.receive_question_ts[0] - self.receive_question_ts[1] - self.ts_difference - self.ping_difference)
 
     def check_question_ack(self, id, timestamp, uuid):
         with self.lock:
@@ -206,8 +208,8 @@ class GameController():
                     self.both_players_received = True
                     print("Both player has received the question " + uuid)
                     return
-                else:
-                    self.update_time_difference()
+                # else:
+                #     self.update_time_difference()
 
         self.generate_question()
         self.notify_players()
@@ -221,17 +223,21 @@ class GameController():
             self.received_acks_cnt[id] += 1
 
             if self.received_acks_cnt[id] == 10 and self.received_acks_cnt[1 - id] == 10:
-                ping0 = sum([(c["client_rec"]-c["server_send"]+c["client_send"]-c["server_rec"]) / 2 for c in self.calibrations[0]]) / 10 
-                ping1 = sum([(c["client_rec"]-c["server_send"]+c["client_send"]-c["server_rec"]) / 2 for c in self.calibrations[1]]) / 10
+                ping0 = sum([(c["client_rec"]-c["server_send"]-c["client_send"]+c["server_rec"]) / 2 for c in self.calibrations[0][5:]]) / 5 
+                ping1 = sum([(c["client_rec"]-c["server_send"]-c["client_send"]+c["server_rec"]) / 2 for c in self.calibrations[1][5:]]) / 5
 
-                print("Player 0 has a ping: ", ping0, " ms") 
-                print("Player 1 has a ping: ", ping1, " ms")
+                print("Player 0 has a ping: ", ping0 * 1000, " ms") 
+                print("Player 1 has a ping: ", ping1 * 1000, " ms")
 
-                delta0 = sum([(c["client_rec"]-c["server_send"]-c["client_send"]+c["server_rec"]) / 2 for c in self.calibrations[0]]) / 10
-                delta1 = sum([(c["client_rec"]-c["server_send"]-c["client_send"]+c["server_rec"]) / 2 for c in self.calibrations[1]]) / 10
+                self.ping_difference = ping0 - ping1
+                self.game.wait_times = [max(0, -self.ping_difference), max(0, self.ping_difference)]
+
+                delta0 = sum([(c["client_rec"]-c["server_send"]+c["client_send"]-c["server_rec"]) / 2 for c in self.calibrations[0][5:]]) / 5
+                delta1 = sum([(c["client_rec"]-c["server_send"]+c["client_send"]-c["server_rec"]) / 2 for c in self.calibrations[1][5:]]) / 5
                 self.ts_difference = delta0 - delta1
-                ready_to_start = True
                 print("Calculated time difference in seconds is: ", self.ts_difference)
+
+                ready_to_start = True
         
         if ready_to_start:
             self.generate_question()

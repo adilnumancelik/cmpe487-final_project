@@ -63,5 +63,5 @@ def threaded_client(conn, controller, id):
     elif message["TYPE"] == "ACK":
       controller.check_question_ack(id, message["TIMESTAMP"], message["QUESTION"])
     elif message["TYPE"] == "CALIBRATION":
-      controller.add_calibration_ack(id, message["TIMESTAMP_R"], message["TIMESTAMP_S"], message["ID"])
+      controller.add_calibration_ack(id, message["TIMESTAMP_R"], message["TIMESTAMP_S"], int(message["ID"]))
 accept_connections()
