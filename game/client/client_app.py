@@ -129,7 +129,7 @@ def answer(event):
             text = "Wrong answer and opponent's was correct."
     elif ans == control.game.answer:
         text = "Correct answer."
-        message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid, "DURATION": timestamp_a-control.time_received}
+        message_object= {"TYPE": "ANSWER","PAYLOAD": control.game.question_uuid, "DURATION": timestamp_a-control.time_received-cotnrol.game.wait_times[control.player_id]}
         message=json.dumps(message_object)
         send_message(message)
     else:
