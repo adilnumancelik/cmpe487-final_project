@@ -89,10 +89,10 @@ def name_func(event):
 name_frame = Tk()
 name_frame.title("S0S")
 
-mes = Label(name_frame, text="Enter your name (should be shorter than 10 characters): ", font=(None, 20)). grid(row = 0, column = 0, padx=5, pady=5)
+mes = Label(name_frame, text="Enter your name (should be shorter than 10 characters): ", font=(None, 15)). grid(row = 0, column = 0, padx=5, pady=5)
 
 answer_form=Entry(name_frame, width="30")
-answer_form.grid(row=1, column=0, pady=3)
+answer_form.grid(row=1, column=0, padx=5,pady=20,ipady=10)
 answer_form.bind('<Key-Return>', name_func)
 
 name_frame.mainloop()
@@ -140,7 +140,6 @@ def exit_func():
     # Closing the connection.
     SERVER.close()
     sys.exit()
-    y.join()
 
 # Function to handle restart call.
 def restart_func():
@@ -162,7 +161,7 @@ answer_form.bind('<Key-Return>', answer)
 # Set label for feedback.
 feedback_message = StringVar()
 feedback_message.set("Type answer, press Enter.")
-feedback = Label(board, textvariable=feedback_message, font=(None, 20)). grid(row = 0, column = 2, padx=5, pady=5, columnspan=5)
+feedback = Label(board, textvariable=feedback_message, font=(None, 15)). grid(row = 0, column = 2, padx=5, pady=5, columnspan=5)
 
 # Radio buttons for choosing S or O.
 s = Radiobutton(board, text='S', font=(None, 20), variable=choice, value='S')
@@ -198,7 +197,7 @@ for i in range(control.game.col):
     for j in range(control.game.row):
         # Create buttons.
         action_with_arg = partial(move, i, j)
-        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "5", height = "2"))
+        buttons.append(Button(board, textvariable = button_vars[i*control.game.col+j], font=(None, 20), command = action_with_arg, width = "7", height = "3"))
         buttons[i*control.game.col+j].grid(row = i+1, column=j+3, padx=5, pady=5)
         buttons[i*control.game.col+j]["state"] = "disabled"
         
@@ -260,8 +259,5 @@ board.mainloop()
 # Closing the connection.
 SERVER.close()
 
-# Join the listening thread.
-y.join()
-
-
+# Exit the program.
 sys.exit()
