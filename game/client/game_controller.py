@@ -1,6 +1,7 @@
 import pickle
 import sys
 import json
+import time
 
 sys.path.append('..')
 
@@ -23,7 +24,12 @@ class GameController():
             elif inc_message_o["TYPE"] == "CALIBRATION":
                 return "CAL"+inc_message_o["PAYLOAD"]
         except:
+            # Load the game.
             self.game = pickle.loads(inc_message)
+            # Sleep so that ping difference between clients does not effect gameplay.
+            print(self.game.wait_times)
+            time.sleep(self.game.wait_times[self.player_id])
+            # Update flag is true, UI can be updated.
             self.UPDATE_FLAG = True
             if self.game.state == GameState.QUESTION:
                 return self.game.question_uuid
