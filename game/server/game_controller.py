@@ -26,6 +26,7 @@ class GameController():
         self.received_acks_cnt = [0, 0]
         self.ping_difference = 0
         self.ts_info = [{}, {}]
+        self.answer_ts = [None, None]
 
     def add_connection(self, conn):
         id = 1
@@ -118,6 +119,7 @@ class GameController():
             self.game.question_uuid = str(uuid.uuid4())
             self.receive_question_ts = [None, None]
             self.both_players_received = False
+            self.answer_ts = [None, None]
 
         print("Generated the Question: " + question +  " / UUID: " + self.game.question_uuid)
 
@@ -178,12 +180,25 @@ class GameController():
         self.generate_question()
         self.notify_players()
     
-    def give_turn(self, id, question_uuid):
+    def give_turn(self, id, question_uuid, duration):
         with self.lock:
             if self.game.state != GameState.QUESTION or self.game.question_uuid != question_uuid:
                 return 
+            
+            self.answer_ts[id] = duration
+            if self.answer_ts[1 - id]:
+                return
+        
+        if not self.answer_ts[1 - id]:
+            time.sleep(abs(2 * self.ping_difference))
+        
+        with self.lock:
             self.game.state = GameState.MOVE
-            self.game.turn = id
+
+            if self.answer_ts[1-id] and self.answer_ts[1-id] < self.answer_ts[id]:
+                self.game.turn = 1 - id
+            else:
+                self.game.turn = id
         
         self.notify_players()
     
@@ -254,8 +269,6 @@ class GameController():
         delta1 = sum([(c["client_rec"]-c["server_send"]+c["client_send"]-c["server_rec"]) / 2 for c in self.calibrations[1][-6:]]) / 6
         self.ts_difference = delta0 - delta1
         print("Calculated time difference in seconds is: ", self.ts_difference)
-
-
         
 
     def add_calibration_ack(self, id, client_rec_ts, client_send_ts, ack_id):
